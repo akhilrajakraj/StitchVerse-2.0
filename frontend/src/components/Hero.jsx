@@ -1,25 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// 1. Upgraded slides with unique images for every single slide!
+// Explicitly import your local assets from the project folder
+import bannerImg from '../assets/images/backgroundindex.jpg';
+import maleImg from '../assets/images/customerhome.jpg.jpg';
+import femaleImg from '../assets/images/tailorbghome.jpg';
+
 const slides = [
   {
     title: "Your Dream Dress Awaits",
     subtitle: "From elegant wedding gowns to stunning evening wear - bring your vision to life with expert craftsmanship.",
     cta: "Design Your Dress",
-    image: "https://readdy.ai/api/search-image?query=Elegant%20fashion%20design%20studio%20with%20beautiful%20custom%20dresses%20displayed%20on%20mannequins%2C%20flowing%20fabrics%20in%20soft%20pastels%2C%20luxury%20wedding%20gowns%2C%20evening%20wear%20with%20natural%20lighting&width=1920&height=1080&seq=hero1&orientation=landscape"
+    image: bannerImg
   },
   {
     title: "Couture Quality, Custom Made",
     subtitle: "Experience luxury tailoring with personalized designs created just for you by master artisans.",
     cta: "Explore Designs",
-    image: "https://readdy.ai/api/search-image?query=Master%20tailor%20working%20on%20intricate%20luxury%20couture%20dress%20in%20warm%20lit%20professional%20fashion%20studio%20with%20measuring%20tape%20and%20fabric%20swatches&width=1920&height=1080&seq=hero2&orientation=landscape"
+    image: maleImg
   },
   {
     title: "Perfect Fit, Every Time",
     subtitle: "Upload your inspiration, choose your style, and watch as skilled tailors create your perfect garment.",
     cta: "Start Creating",
-    image: "https://readdy.ai/api/search-image?query=High%20fashion%20fitting%20room%20with%20elegant%20woman%20trying%20on%20custom%20gown%2C%20large%20mirrors%2C%20sophisticated%20boutique%20interior%20design&width=1920&height=1080&seq=hero3&orientation=landscape"
+    image: femaleImg
   }
 ];
 
@@ -29,24 +33,23 @@ export default function Hero() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 6000); // Slowed down slightly to 6 seconds so users can enjoy the images
+    }, 6000); // 6 seconds transition window
     
     return () => clearInterval(timer);
   }, []); 
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-900">
       
-      {/* Dynamic Background Image with Smooth Cross-Fade */}
+      {/* 1. Hardware Accelerated High-Fidelity Image Engine */}
       {slides.map((slide, index) => (
-        <div
+        <img
           key={index}
-          className={`absolute inset-0 w-full h-full bg-cover bg-center bg-fixed transition-opacity duration-1000 ease-in-out ${
-            index === currentSlide ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{
-            backgroundImage: `url('${slide.image}')`
-          }}
+          src={slide.image}
+          alt=""
+          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ease-in-out select-none will-change-opacity ${
+            index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+          } transition-transform duration-[6000ms]`}
         />
       ))}
 
@@ -61,7 +64,7 @@ export default function Hero() {
             
             <div className="overflow-hidden">
               <h1 
-                className="text-5xl md:text-7xl font-bold mb-6 text-white drop-shadow-lg transition-all duration-700 transform"
+                className="text-5xl md:text-7xl font-bold mb-6 text-white drop-shadow-lg transition-all duration-700"
                 key={currentSlide}
               >
                 {slides[currentSlide].title}

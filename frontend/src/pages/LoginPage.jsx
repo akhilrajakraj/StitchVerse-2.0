@@ -40,26 +40,54 @@ export default function LoginPage() {
                 formData
             );
 
-            // 2. Put the tokens safely in the backpack (localStorage)
+            const userRole = response.data.user.role;
+            const userName = response.data.user.full_name || 'User';
+
+            // 2. Put the tokens and metadata safely in the backpack (localStorage)
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-            localStorage.setItem('user_role', response.data.user.role);
+            localStorage.setItem('user_role', userRole);
+            localStorage.setItem('full_name', userName);
 
             // 3. Broadcast to the rest of the app that you are logged in!
             login({
                 token: response.data.access,
-                role: response.data.user.role
+                role: userRole,
+                full_name: userName
             });
 
-            // 4. Show success modal, wait 1.5 seconds, then drive to Dashboard
+            // 4. Show success modal
             setModal({ 
                 isOpen: true, 
                 title: 'Welcome Back!', 
-                message: 'Login successful. Taking you to your dashboard...', 
+                message: `Login successful. Taking you to your workspace...`, 
                 type: 'success' 
             });
             
-            setTimeout(() => navigate('/dashboard'), 1500);
+            // 5. THE ULTIMATE ROLE-BASED TRAFFIC COP CONTROLLER 🚦
+            setTimeout(() => {
+                switch (userRole) {
+                    case 'admin':
+                        navigate('/admin/dashboard');
+                        break;
+                    case 'staff':
+                        navigate('/staff/dashboard');
+                        break;
+                    case 'tailor':
+                        navigate('/tailor/dashboard');
+                        break;
+                    case 'delivery':
+                        navigate('/delivery/dashboard');
+                        break;
+                    case 'support':
+                        navigate('/support/dashboard');
+                        break;
+                    case 'customer':
+                    default:
+                        navigate('/dashboard'); // Standard Customer view dashboard
+                        break;
+                }
+            }, 1500);
 
         } catch (error) {
             console.error('Login Error:', error);

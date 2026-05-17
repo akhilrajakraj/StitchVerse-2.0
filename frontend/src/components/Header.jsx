@@ -13,22 +13,22 @@ export default function Header() {
         <div className="flex items-center justify-between">
 
           {/* LOGO */}
-          <Link to="/" className="text-2xl font-bold text-purple-600 dark:text-purple-400" style={{fontFamily: 'Pacifico, serif'}}>
+          <Link to="/" className="text-2xl font-bold text-purple-600 font-pacifico" style={{fontFamily: 'Pacifico, cursive'}}>
             StitchVerse
           </Link>
 
           {/* DESKTOP NAVIGATION */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/gallery" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer">
+            <Link to="/gallery" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >
               Gallery
             </Link>
-            <Link to="/for-tailors" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer">
+            <Link to="/for-tailors" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >
               Find Tailors
             </Link>
-            <Link to="/how-it-works" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer">
+            <Link to="/how-it-works" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >
               How It Works
             </Link>
-            <Link to="/about" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer">
+            <Link to="/about" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >
               About
             </Link>
           </nav>
@@ -48,14 +48,14 @@ export default function Header() {
               )}
             </button>
 
-            <Link to="/login" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer">
+            <Link to="/login" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer font-pacifico" style={{fontFamily: 'Pacifico, cursive'}}  >
               Sign In
             </Link>
-            <Link to="/register" className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap cursor-pointer">
-              Customer
+            <Link to="/register" className="bg-purple-600 text-white px-6 py-2 rounded-lg text-center whitespace-normalize cursor-pointer hover:bg-purple-700 transition-colors font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >
+              Customer Registration
             </Link>
-            <Link to="/register/tailor" className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap cursor-pointer">
-              Tailor
+            <Link to="/register/tailor" className="bg-purple-600 text-white px-6 py-2 rounded-lg text-center whitespace-normalize cursor-pointer hover:bg-purple-700 transition-colors font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >
+              Tailor Registration
             </Link>
           </div>
 
