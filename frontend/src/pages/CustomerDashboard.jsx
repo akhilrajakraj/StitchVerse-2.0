@@ -1,31 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 export default function CustomerDashboardPage() {
-    // 1. Grab the user's data from our Walkie-Talkie
+    // Grab the user information from context state
     const { user } = useAuth();
     
-    // Fallback name just in case the data is still loading
-    const customerName = user?.full_name || 'null'; 
+    // --- STATE MANAGEMENT FOR REAL DATA ---
+    const [customerName, setCustomerName] = useState(user?.full_name || 'Valued Customer');
+    const [activeOrders, setActiveOrders] = useState([]);
+    const [userMeasurements, setUserMeasurements] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // --- MOCK DATA (To be replaced by Django later!) ---
-    const recentOrders = [
-        { id: 'ORD-7829', item: 'Midnight Blue Three-Piece Suit', tailor: 'MasterCraft Suits', status: 'Fitting Scheduled', date: 'Oct 24, 2026', price: '$450' },
-        { id: 'ORD-7810', item: 'Silk Evening Gown', tailor: 'Elite Threads', status: 'In Progress', date: 'Oct 18, 2026', price: '$820' },
-        { id: 'ORD-7750', item: 'Cotton Summer Shirt', tailor: 'Vintage Vogue', status: 'Delivered', date: 'Sep 30, 2026', price: '$85' }
-    ];
+    // --- EFFECT HOOK: FETCH REAL DATA FROM DJANGO ON MOUNT ---
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                // Grab the access token from local storage pack
+                const token = localStorage.getItem('access_token');
+                
+                if (!token) return;
 
-    const measurements = {
-        updated: 'Oct 15, 2026',
-        profile: 'Standard Fit',
-        height: '5\'10"',
-        chest: '40"',
-        waist: '32"',
-        hips: '38"'
-    };
+                // Setup our authentication config headers
+                const apiConfig = {
+                    headers: { Authorization: `Bearer ${token}` }
+                };
 
-    // Helper function for beautiful status badges
+                // Fetch data simultaneously from your Django backend
+                // (Note: Replace these URLs with your exact endpoints when you build your order/measurement views!)
+                const profileResponse = await axios.get('http://localhost:8000/api/v1/accounts/profile/me/', apiConfig);
+                
+                if (profileResponse.data) {
+                    setCustomerName(profileResponse.data.full_name);
+                    setUserMeasurements(profileResponse.data.measurements); 
+                    setActiveOrders(profileResponse.data.recent_orders || []);
+                }
+
+            } catch (error) {
+                console.error("Error retrieving live database metrics:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, [user]);
+
+    // Helper status badge painter
     const getStatusBadge = (status) => {
         switch(status) {
             case 'Delivered': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400';
@@ -35,12 +57,19 @@ export default function CustomerDashboardPage() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
             
             {/* --- WELCOME BANNER --- */}
             <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-3xl p-8 md:p-12 text-white shadow-lg shadow-purple-500/30 mb-10 relative overflow-hidden">
-                {/* Decorative background circles */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
                 <div className="absolute bottom-0 right-32 w-48 h-48 bg-black/10 rounded-full blur-2xl translate-y-1/2"></div>
                 
@@ -84,7 +113,7 @@ export default function CustomerDashboardPage() {
             {/* --- DASHBOARD SPLIT VIEW --- */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                {/* Left Side: Recent Orders (Takes up 2 columns) */}
+                {/* Left Side: Real Database Active Orders */}
                 <div className="lg:col-span-2">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                         <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
@@ -92,50 +121,58 @@ export default function CustomerDashboardPage() {
                             <Link to="/orders" className="text-purple-600 dark:text-purple-400 text-sm font-semibold hover:underline">View All</Link>
                         </div>
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
-                                        <th className="p-4 font-bold">Item Details</th>
-                                        <th className="p-4 font-bold">Tailor</th>
-                                        <th className="p-4 font-bold">Status</th>
-                                        <th className="p-4 font-bold text-right">Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                    {recentOrders.map((order, idx) => (
-                                        <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
-                                            <td className="p-4">
-                                                <div className="font-bold text-gray-900 dark:text-white">{order.item}</div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400">{order.id} • {order.date}</div>
-                                            </td>
-                                            <td className="p-4 text-sm text-gray-600 dark:text-gray-300">{order.tailor}</td>
-                                            <td className="p-4">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${getStatusBadge(order.status)}`}>
-                                                    {order.status}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 text-right font-bold text-gray-900 dark:text-white">
-                                                {order.price}
-                                            </td>
+                            {activeOrders.length === 0 ? (
+                                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                                    <i className="ri-shopping-bag-line text-4xl mb-2 block"></i>
+                                    No custom apparel processing at the moment.
+                                </div>
+                            ) : (
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
+                                            <th className="p-4 font-bold">Item Details</th>
+                                            <th className="p-4 font-bold">Tailor</th>
+                                            <th className="p-4 font-bold">Status</th>
+                                            <th className="p-4 font-bold text-right">Price</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                        {activeOrders.map((order) => (
+                                            <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+                                                <td className="p-4">
+                                                    <div className="font-bold text-gray-900 dark:text-white">{order.item_type}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{order.order_number} • {order.date_placed}</div>
+                                                </td>
+                                                <td className="p-4 text-sm text-gray-600 dark:text-gray-300">{order.tailor_name}</td>
+                                                <td className="p-4">
+                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${getStatusBadge(order.status)}`}>
+                                                        {order.status}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-right font-bold text-gray-900 dark:text-white">
+                                                    ₹{order.total_amount}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                {/* Right Side: Saved Measurements Vault */}
+                {/* Right Side: Saved Measurements Profile Straight from Django Table */}
                 <div className="lg:col-span-1">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 relative overflow-hidden h-full">
-                        {/* A soft gradient background for the vault */}
                         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-pink-500/10 to-purple-500/10 dark:from-pink-500/5 dark:to-purple-500/5"></div>
                         
                         <div className="relative z-10">
                             <div className="flex justify-between items-start mb-6">
                                 <div>
                                     <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">My Sizing Vault</h2>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Last updated: {measurements.updated}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        Profile: {userMeasurements?.label || 'None Saved'}
+                                    </p>
                                 </div>
                                 <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center">
                                     <i className="ri-ruler-line text-xl"></i>
@@ -144,26 +181,34 @@ export default function CustomerDashboardPage() {
 
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 border-dashed">
-                                    <span className="text-gray-600 dark:text-gray-400">Fit Profile</span>
-                                    <span className="font-semibold text-gray-900 dark:text-white">{measurements.profile}</span>
+                                    <span className="text-gray-600 dark:text-gray-400">Chest Circumference</span>
+                                    <span className="font-semibold text-gray-900 dark:text-white">
+                                        {userMeasurements?.chest_cm ? `${userMeasurements.chest_cm} cm` : '--'}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 border-dashed">
-                                    <span className="text-gray-600 dark:text-gray-400">Height</span>
-                                    <span className="font-semibold text-gray-900 dark:text-white">{measurements.height}</span>
+                                    <span className="text-gray-600 dark:text-gray-400">Waist Profile</span>
+                                    <span className="font-semibold text-gray-900 dark:text-white">
+                                        {userMeasurements?.waist_cm ? `${userMeasurements.waist_cm} cm` : '--'}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 border-dashed">
-                                    <span className="text-gray-600 dark:text-gray-400">Chest</span>
-                                    <span className="font-semibold text-gray-900 dark:text-white">{measurements.chest}</span>
+                                    <span className="text-gray-600 dark:text-gray-400">Hip Line</span>
+                                    <span className="font-semibold text-gray-900 dark:text-white">
+                                        {userMeasurements?.hip_cm ? `${userMeasurements.hip_cm} cm` : '--'}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 border-dashed">
-                                    <span className="text-gray-600 dark:text-gray-400">Waist</span>
-                                    <span className="font-semibold text-gray-900 dark:text-white">{measurements.waist}</span>
+                                    <span className="text-gray-600 dark:text-gray-400">Sleeve Length</span>
+                                    <span className="font-semibold text-gray-900 dark:text-white">
+                                        {userMeasurements?.sleeve_length_cm ? `${userMeasurements.sleeve_length_cm} cm` : '--'}
+                                    </span>
                                 </div>
                             </div>
 
-                            <button className="w-full bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 py-3 rounded-xl font-bold hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors border border-purple-200 dark:border-purple-500/30">
-                                Update Measurements
-                            </button>
+                            <Link to="/measurements/update" className="w-full block text-center bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 py-3 rounded-xl font-bold hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors border border-purple-200 dark:border-purple-500/30">
+                                Modify Fit Dimensions
+                            </Link>
                         </div>
                     </div>
                 </div>
