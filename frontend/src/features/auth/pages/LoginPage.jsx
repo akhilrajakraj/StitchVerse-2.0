@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 
 // Import your local background image
-import bgImage from '../assets/images/backgroundindex.jpg';
+import bgImage from '../../../assets/images/backgroundindex.jpg';
 
 export default function LoginPage() {
     // 1. Grab our Walkie-Talkie and Steering Wheel

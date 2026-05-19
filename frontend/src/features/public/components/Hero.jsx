@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 // Explicitly import your local assets from the project folder
-import bannerImg from '../assets/images/backgroundindex.jpg';
-import maleImg from '../assets/images/customerhome.jpg.jpg';
-import femaleImg from '../assets/images/tailorbghome.jpg';
+import bannerImg from '../../../assets/images/backgroundindex.jpg';
+import maleImg from '../../../assets/images/customerhome.jpg.jpg';
+import femaleImg from '../../../assets/images/tailorbghome.jpg';
 
 const slides = [
   {

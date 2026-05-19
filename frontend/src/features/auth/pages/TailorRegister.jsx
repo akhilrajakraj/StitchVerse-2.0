@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 // Import your local background image!
-import bgImage from '../assets/images/backgroundindex.jpg';
+import bgImage from '../../../assets/images/backgroundindex.jpg';
 
 export default function TailorRegisterPage() {
     const navigate = useNavigate();

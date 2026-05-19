@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import TailorHeader from '../components/TailorHeader';
+import TailorHeader from '../../features/tailor/components/TailorHeader';
 import Footer from '../components/Footer';
 
 export default function TailorLayout() {

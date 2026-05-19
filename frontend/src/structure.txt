@@ -1,0 +1,101 @@
+Folder PATH listing
+Volume serial number is 000000B1 3220:A048
+C:.
+|   App.css
+|   App.jsx
+|   index.css
+|   main.jsx
+|   structure.txt
+|   
++---assets
+|   |   hero.png
+|   |   react.svg
+|   |   vite.svg
+|   |   
+|   \---images
+|           backgroundindex.jpg
+|           bridalgown.jpg
+|           cstorybride.jpg
+|           ctabg.jpg
+|           ctabgtailor.jpg
+|           custombussiness.jpg
+|           customerhome.jpg.jpg
+|           eveningdress.jpg
+|           formalwear.jpg
+|           gallerycocktail.jpg
+|           galleryevening.jpg
+|           gallerymaxi.jpg
+|           gallerywedding.jpg
+|           summerfloaral.jpg
+|           tailorbghome.jpg
+|           tailorcta.jpg
+|           uniforms.jpg
+|           weddingg2.jpg
+|           
++---context
+|       AuthContext.jsx
+|       ThemeContext.jsx
+|       
++---features
+|   +---admin
+|   |   +---components
+|   |   |       AdminSidebar.jsx
+|   |   |       
+|   |   \---pages
+|   |           AdminDashboardPage.jsx
+|   |           
+|   +---auth
+|   |   \---pages
+|   |           CustomRegister.jsx
+|   |           LoginPage.jsx
+|   |           TailorRegister.jsx
+|   |           
+|   +---customer
+|   |   \---pages
+|   |           CustomerDashboard.jsx
+|   |           
+|   +---delivery
+|   +---designs
+|   +---notifications
+|   +---orders
+|   +---payments
+|   +---public
+|   |   +---components
+|   |   |       CTA.jsx
+|   |   |       Features.jsx
+|   |   |       Gallery.jsx
+|   |   |       Hero.jsx
+|   |   |       Testimonials.jsx
+|   |   |       
+|   |   \---pages
+|   |           HomePage.jsx
+|   |           
+|   +---support
+|   \---tailor
+|       +---components
+|       |       TailorCTA.jsx
+|       |       TailorFeatures.jsx
+|       |       TailorHeader.jsx
+|       |       TailorSuccess.jsx
+|       |       
+|       +---pages
+|       |       TailorLandingPage.jsx
+|       |       
+|       \---services
++---routes
+|       AppRoutes.jsx
+|       ProtectedRoute.jsx
+|       
+\---shared
+    +---components
+    |       Footer.jsx
+    |       Header.jsx
+    |       Navbar.jsx
+    |       
+    +---hooks
+    +---layouts
+    |       AdminLayout.jsx
+    |       MainLayout.jsx
+    |       TailorLayout.jsx
+    |       
+    \---services

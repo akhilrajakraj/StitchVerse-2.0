@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,7 +51,7 @@ export default function Header() {
             <Link to="/login" className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors whitespace-nowrap cursor-pointer font-pacifico" style={{fontFamily: 'Pacifico, cursive'}}  >
               Sign In
             </Link>
-            <Link to="/register" className="bg-purple-600 text-white px-6 py-2 rounded-lg text-center whitespace-normalize cursor-pointer hover:bg-purple-700 transition-colors font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >
+            <Link to="/register/customer" className="bg-purple-600 text-white px-6 py-2 rounded-lg text-center whitespace-normalize cursor-pointer hover:bg-purple-700 transition-colors font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >
               Customer Registration
             </Link>
             <Link to="/register/tailor" className="bg-purple-600 text-white px-6 py-2 rounded-lg text-center whitespace-normalize cursor-pointer hover:bg-purple-700 transition-colors font-pacifico" style={{fontFamily: 'Pacifico, cursive'}} >

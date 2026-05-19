@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import AdminSidebar from '../components/AdminSidebar';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import AdminSidebar from '../../features/admin/components/AdminSidebar';
 
 export default function AdminLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
