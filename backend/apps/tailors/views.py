@@ -15,6 +15,10 @@ from .services import (
     TailorRegService,
 )
 
+from .selectors import(
+    TailorSelectors,
+)
+
 class RegisterTailorAPIView(APIView):
     
     """
@@ -66,8 +70,25 @@ class TailorProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        tailor = request.user
-        serializer = TailorProfileSerializer(tailor)
+        
+        profile = TailorSelectors.get_tailor_profile(
+            user=request.user
+        )
+        
+        if not profile:
+            
+            return Response(
+                {
+                    'success': False,
+                    'message':'Tailor Profile not found.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = TailorProfileSerializer(
+            profile
+        )
+        
         return Response(
             {
                 'success': True,
@@ -76,3 +97,40 @@ class TailorProfileAPIView(APIView):
             status=status.HTTP_200_OK
         )
     
+    def put(self, request):
+        
+        profile = TailorSelectors.get_tailor_profile(
+            user=request.user
+        )
+        
+        if not profile:
+            
+            return Response(
+                {
+                    'success':False,
+                    'message':'Tailor Profile not found.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = TailorProfileSerializer(
+            profile,
+            data=request.data,
+            partial=True,
+        )
+        
+        serializer.is_valid(
+            raise_exception=True
+        )
+        
+        serializer.save()
+        
+        return Response(
+            {
+                'success':True,
+                'message':'Profile Updated Successfully.',
+                'data':serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+

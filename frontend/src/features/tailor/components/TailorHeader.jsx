@@ -20,7 +20,7 @@ export default function TailorHeader() {
         <div className="flex items-center justify-between">
 
           {/* LOGO - Notice the Blue color for Tailors! */}
-          <Link to="/tailor/dashboard" className="text-2xl font-bold text-blue-600 dark:text-blue-400" style={{fontFamily: 'Pacifico, serif'}}>
+          <Link to="/tailor/dashboard" className="text-2xl font-bold text-blue-600 dark:text-blue-400" style={{fontFamily: 'Pacifico, cursive'}}>
             StitchVerse <span className="text-sm font-sans text-gray-500 dark:text-gray-400 ml-2">for Tailors</span>
           </Link>
 

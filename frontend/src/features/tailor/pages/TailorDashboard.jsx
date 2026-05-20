@@ -82,6 +82,9 @@ export default function TailorDashboard() {
                     <Link to="/tailor/upload" className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-md transition-all">
                         <i className="ri-add-line text-lg"></i> Upload New Design
                     </Link>
+                    <Link to="/tailor/profile" className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-md transition-all">
+                        <i className="ri-user-line text-lg"></i> Update Profile
+                    </Link>
                     <Link to="/tailor/portfolio" className="flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
                         <i className="ri-gallery-line text-lg"></i> Edit Studio Portfolio
                     </Link>
