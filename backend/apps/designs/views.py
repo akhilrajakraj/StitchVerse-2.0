@@ -1,9 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 
 from .serializers import (
     CreateDesignSerializer,
+    DesignCategorySerializer,
+)
+
+from .models import (
+    Design,
+    DesignCategory,
 )
 
 from .services import (
@@ -42,6 +49,20 @@ class CreateDesignAPIView(APIView):
             status=status.HTTP_201_CREATED
         )
         
+class DesignCategoryListAPIView(APIView):
+    """
+    API endpoint for public retrieval of the dynamic design categories taxonomy tree.
+    """
+    permission_classes = [AllowAny] # 🔓 No authentication required for reading categories
+
+    def get(self, request):
+        # Fetch root categories (categories without a parent) to handle nested trees,
+        # or grab all categories directly. Let's pull all seeded entries:
+        categories = DesignCategory.objects.all()
         
+        # Serialize database entries into standard clean JSON formats
+        serializer = DesignCategorySerializer(categories, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     

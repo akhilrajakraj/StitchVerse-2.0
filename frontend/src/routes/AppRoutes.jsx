@@ -18,11 +18,14 @@ import HomePage from '../features/public/pages/HomePage';
 // 4. Authenticated Role Feature Dashboard Pages
 import CustomerDashboard from '../features/customer/pages/CustomerDashboard';
 import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage'; // 👈 Matched with structure.txt!
-// import TailorDashboard from '../features/tailor/pages/TailorDashboard';   // (Uncomment when file is added!)
+import TailorDashboard from '../features/tailor/pages/TailorDashboard';   
 // import TailorApprovals from '../features/admin/pages/TailorApprovals';   // (Uncomment when file is added!)
 
 // 5. Authorization Guardians (Route Protection Bouncers)
 import ProtectedRoute from './ProtectedRoute';
+
+// 6. Tailor-Specific Feature Pages (Nested under TailorLayout for shared header/footer)
+import UploadDesignPage from '../features/tailor/pages/UploadDesignPage';
 
 export default function AppRoutes() {
     return (
@@ -61,7 +64,7 @@ export default function AppRoutes() {
             {/* 🔵 BUSINESS TAILOR WORKSPACE PORTAL SHELL */}
             <Route element={<TailorLayout />}>
                 {/* Secured Tailor Vendor Workspace */}
-                {/* <Route 
+                 <Route 
                     path="/tailor/dashboard" 
                     element={
                         <ProtectedRoute allowedRoles={['tailor']}>
@@ -69,12 +72,11 @@ export default function AppRoutes() {
                         </ProtectedRoute>
                     } 
                 />
-                */}
                 
-                {/* 💡 TAILOR SUB-MODULE EXPANSIONS:
-                    Nest custom artisan-facing operations safely within this route segment:
+                
+                
                     <Route path="/tailor/upload" element={<ProtectedRoute allowedRoles={['tailor']}><UploadDesignPage /></ProtectedRoute>} />
-                    <Route path="/tailor/orders" element={<ProtectedRoute allowedRoles={['tailor']}><TailorOrdersPage /></ProtectedRoute>} />
+                {/*    <Route path="/tailor/orders" element={<ProtectedRoute allowedRoles={['tailor']}><TailorOrdersPage /></ProtectedRoute>} />
                 */}
             </Route>
 
