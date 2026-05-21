@@ -33,36 +33,7 @@ class DesignCategorySerializer(serializers.ModelSerializer):
             'id',
         ]
 
-class DesignSerializer(serializers.ModelSerializer):
-    
-    """
-    Serializer for Tailors design.
-    """
-    tailor = UserSerializer(read_only=True)
-    category = DesignCategorySerializer()
-    
-    class Meta:
-        
-        model = Design
-        
-        fields = [
-            'id',
-            'tailor',
-            'category',
-            'name',
-            'description',
-            'price',
-            'is_active',
-            'created_at',
-            'updated_at',
-        ]
-        
-        read_only_fields = [
-            'id',
-            'tailor',
-            'created_at',
-            'updated_at',
-        ]
+
 
 class DesignImageSerializer(serializers.ModelSerializer):
     
@@ -70,15 +41,12 @@ class DesignImageSerializer(serializers.ModelSerializer):
     Serializers for Design Image.
     """
     
-    design = DesignSerializer()
-    
     class Meta:
         
         model = DesignImage
         
         fields = [
             'id',
-            'design',
             'image',
             'is_primary',
             'order',
@@ -114,7 +82,6 @@ class DesignTagMapSerializer(serializers.ModelSerializer):
     """
     Serializer for Design Tag Map.
     """
-    design = DesignSerializer()
     tag = DesignTagSerializer()
 
     class Meta:
@@ -129,7 +96,41 @@ class DesignTagMapSerializer(serializers.ModelSerializer):
             'design',
             'tag',
         ]
+
+
+class DesignSerializer(serializers.ModelSerializer):
     
+    """
+    Serializer for Tailors design.
+    """
+    tailor = UserSerializer(read_only=True)
+    category = DesignCategorySerializer()
+    image = DesignImageSerializer(read_only=True, many=True )
+    
+    class Meta:
+        
+        model = Design
+        
+        fields = [
+            'id',
+            'tailor',
+            'category',
+            'name',
+            'description',
+            'price',
+            'is_active',
+            'created_at',
+            'updated_at',
+            'image',
+        ]
+        
+        read_only_fields = [
+            'id',
+            'tailor',
+            'created_at',
+            'updated_at',
+        ]
+
 class CreateDesignSerializer(serializers.ModelSerializer):
     
     """

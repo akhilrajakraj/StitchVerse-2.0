@@ -50,5 +50,30 @@ export const tailorApi = {
         };
         const response = await axios.put('http://localhost:8000/api/v1/tailors/profile/', profileData, config);
         return response.data
+    },
+
+    getMyDesigns: async () => {
+        const token = localStorage.getItem('access_token');
+        const config = {
+            headers:{
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        };
+        const response = await axios.get(`${BASE_URL}/designs/portfolio/me/`, config);
+        return response.data;
+    },
+
+    deleteDesign: async (design_id) => {
+        const token = localStorage.getItem('access_token');
+        const config = {
+            headers:{
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        };
+        const response = await axios.delete(`${BASE_URL}/designs/${design_id}/`, config);
+        return response.data;
     }
+
 };

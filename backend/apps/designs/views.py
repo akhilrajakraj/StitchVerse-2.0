@@ -1,11 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .serializers import (
     CreateDesignSerializer,
     DesignCategorySerializer,
+    DesignSerializer,
 )
 
 from .models import (
@@ -17,6 +18,9 @@ from .services import (
     DesignServices,
 )
 
+from .selectors import(
+    DesignSelectors,
+)
 class CreateDesignAPIView(APIView):
     
     """
@@ -64,5 +68,62 @@ class DesignCategoryListAPIView(APIView):
         serializer = DesignCategorySerializer(categories, many=True)
         
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TailorDesignListAPIView(APIView):
+    
+    """
+    API Endpoint for retreiving respective tailors portfolio.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        
+        designs = DesignSelectors.get_tailor_designs(
+            tailor=request.user
+        )
+        
+        serializer = DesignSerializer(
+            designs,
+            many=True
+        )
+        
+        return Response(
+            {
+                'success':True,
+                'data':serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+        
+class TailorDesignDetailAPIView(APIView):
+    
+    """
+    API endpoint of retreiving specific design details.
+    """
+    def delete(self, request, design_id):
+        
+        design = DesignSelectors.get_design_by_id(
+            design_id
+        )
+        
+        if not design or design.tailor != request.user:
+            
+            return Response(
+                {
+                    'detail':'Design not found or unauthorized'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        DesignServices.delete_design(design)
+        
+        return Response(
+            {
+                'success':True,
+                'message':'Design deleted successfully.'
+            }
+        )
+    
+    
     
     

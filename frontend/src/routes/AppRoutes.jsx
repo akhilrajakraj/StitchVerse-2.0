@@ -27,6 +27,7 @@ import ProtectedRoute from './ProtectedRoute';
 // 6. Tailor-Specific Feature Pages (Nested under TailorLayout for shared header/footer)
 import UploadDesignPage from '../features/tailor/pages/UploadDesignPage';
 import TailorProfilePage from '../features/tailor/pages/TailorProfilePage';
+import StudioPortfolioPage from '../features/tailor/pages/StudioPortfolioPage';
 
 export default function AppRoutes() {
     return (
@@ -78,8 +79,10 @@ export default function AppRoutes() {
                 
                     <Route path="/tailor/upload" element={<ProtectedRoute allowedRoles={['tailor']}><UploadDesignPage /></ProtectedRoute>} />
                     <Route path="/tailor/profile" element={<ProtectedRoute allowedRoles={['tailor']}><TailorProfilePage /></ProtectedRoute>} />
+                    <Route path="/tailor/portfolio" element={<ProtectedRoute allowedRoles={['tailor']}><StudioPortfolioPage /></ProtectedRoute>} />
                 {/*    <Route path="/tailor/orders" element={<ProtectedRoute allowedRoles={['tailor']}><TailorOrdersPage /></ProtectedRoute>} />
                 */}
+    
             </Route>
 
 

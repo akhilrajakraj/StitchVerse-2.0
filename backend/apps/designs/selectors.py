@@ -28,7 +28,7 @@ class DesignSelectors:
     
     @staticmethod
     def get_active_designs(
-        is_active
+        is_active=True
     ):
         
         return Design.objects.filter(
