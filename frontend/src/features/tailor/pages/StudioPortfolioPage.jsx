@@ -1,36 +1,34 @@
-// 🌟 FIX 1: Explicitly added 'React' to stop the red underline warning!
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { tailorApi } from '../services/tailorApi';
 import DesignCard from '../../designs/components/DesignCard';
 
 export default function StudioPortfolioPage() {
+    // We start with isLoading as true, so the spinner shows instantly
     const [designs, setDesigns] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // 🌟 FIX 2: We define the function FIRST, before we ever try to use it.
-    // Now JavaScript knows exactly what to do when we call it later!
-    const fetchMyDesigns = async () => {
-        try {
-           {/* setIsLoading(true); */} // We set loading to true at the start of the function, but we also set it to false in the finally block. This way, if the function is called again for any reason, it will show the loading spinner again until it finishes.
-            const response = await tailorApi.getMyDesigns();
-            if (response.success) {
-                setDesigns(response.data || []);
-            }
-        } catch (err) {
-            console.error("Failed to fetch portfolio:", err);
-            setError("Could not load your designs. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // 🌟 The useEffect sits BELOW the function definition now.
-    // It safely calls fetchMyDesigns because it has already been read.
+    // 🌟 FIX 1: Define and call the fetch function strictly INSIDE the useEffect.
+    // This perfectly synchronizes React's render cycle and stops the cascading warning!
     useEffect(() => {
+        const fetchMyDesigns = async () => {
+            try {
+                const response = await tailorApi.getMyDesigns();
+                if (response.success) {
+                    setDesigns(response.data || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch portfolio:", err);
+                setError("Could not load your designs. Please try again.");
+            } finally {
+                // Safely turns off the spinner asynchronously
+                setIsLoading(false);
+            }
+        };
+
         fetchMyDesigns();
-    }, []);
+    }, []); // Empty array means this absolutely only runs once on mount.
 
     const handleDelete = async (designId) => {
         if (!window.confirm("Are you sure you want to permanently delete this design?")) return;
@@ -38,10 +36,12 @@ export default function StudioPortfolioPage() {
         try {
             const response = await tailorApi.deleteDesign(designId);
             if (response.success) {
-                // Instantly remove the card from the UI grid without refreshing the page
+                // Instantly remove the card from the UI grid
                 setDesigns(prev => prev.filter(d => d.id !== designId));
             }
         } catch (err) {
+            // 🌟 FIX 2: We now USE the 'err' variable by logging it, satisfying ESLint!
+            console.error("Delete operation failed:", err);
             alert("Failed to delete design. It may be locked to active orders.");
         }
     };
@@ -55,6 +55,7 @@ export default function StudioPortfolioPage() {
         console.log("View clicked for:", design.name);
     };
 
+    // If loading, show the spinner and nothing else
     if (isLoading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
@@ -94,11 +95,12 @@ export default function StudioPortfolioPage() {
                 </div>
             </div>
 
-            {/* Grid Canvas Area */}
+            {/* Error Banner */}
             {error && (
                 <div className="p-4 bg-red-50 text-red-600 rounded-xl mb-6 font-bold">{error}</div>
             )}
 
+            {/* Empty State vs Grid Canvas */}
             {designs.length === 0 && !error ? (
                 <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
                     <div className="w-24 h-24 mx-auto mb-5 bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center">
