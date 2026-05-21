@@ -44,6 +44,13 @@ class CreateDesignAPIView(APIView):
             price=serializer.validated_data['price']
         )
         
+        images = request.FILES.getlist('images')
+        if images:
+            DesignServices.upload_design_images(
+                design=design,
+                images=images
+            )
+        
         return Response(
             {
                 'success':True,

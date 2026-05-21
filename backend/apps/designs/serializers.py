@@ -105,7 +105,7 @@ class DesignSerializer(serializers.ModelSerializer):
     """
     tailor = UserSerializer(read_only=True)
     category = DesignCategorySerializer()
-    image = DesignImageSerializer(read_only=True, many=True )
+    images = DesignImageSerializer(read_only=True, many=True )
     
     class Meta:
         
@@ -121,7 +121,7 @@ class DesignSerializer(serializers.ModelSerializer):
             'is_active',
             'created_at',
             'updated_at',
-            'image',
+            'images',
         ]
         
         read_only_fields = [

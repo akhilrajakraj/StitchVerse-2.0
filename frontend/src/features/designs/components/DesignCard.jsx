@@ -1,7 +1,7 @@
 export default function DesignCard({ design, onEdit, onDelete, onView }) {
     // Safely extract the first image from the Django relation, or use a placeholder
     const coverImage = design.images && design.images.length > 0 
-        ? design.images[0].image 
+        ? `http://127.0.0.1:8000${design.images[0].image}`
         : 'https://via.placeholder.com/300x300?text=No+Image';
 
     // Safely extract category name
