@@ -39,6 +39,13 @@ class AccountSelectors:
             status=status
         ).first()
     
+    @staticmethod
+    def get_user_measurements(user):
+        """
+        Get User Measurements.
+        """
+        return user.measurements.all()
+    
         
         
         

@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
 from .views import(
     CustomTokenObtainPairView,
     RegisterCustomerAPIView,
+    CreateMeasurementAPIView,
 )
 
 urlpatterns = [
@@ -27,5 +28,11 @@ urlpatterns = [
         'register/',
         RegisterCustomerAPIView.as_view(),
         name='register_customer',
+    ),
+    
+    path(
+        'measurements/',
+        CreateMeasurementAPIView.as_view(),
+        name='create_measurement',
     )
 ]
