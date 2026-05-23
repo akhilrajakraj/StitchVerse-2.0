@@ -8,6 +8,7 @@ from .views import(
     CustomTokenObtainPairView,
     RegisterCustomerAPIView,
     CreateMeasurementAPIView,
+    CustomerProfileAPIView,
 )
 
 urlpatterns = [
@@ -28,6 +29,12 @@ urlpatterns = [
         'register/',
         RegisterCustomerAPIView.as_view(),
         name='register_customer',
+    ),
+    
+    path(
+        'profile/',
+        CustomerProfileAPIView.as_view(),
+        name='customer_profile',
     ),
     
     path(

@@ -84,7 +84,7 @@ export default function LoginPage() {
                         break;
                     case 'customer':
                     default:
-                        navigate('/dashboard'); // Standard Customer view dashboard
+                        navigate('/customer/dashboard'); // Standard Customer view dashboard
                         break;
                 }
             }, 1500);

@@ -25,6 +25,9 @@ from .permissions import(
     IsCustomer,
 )
 
+from .selectors import(
+    AccountSelectors,
+)
 class CustomTokenObtainPairView(TokenObtainPairView):
     
     serializer_class = CustomTokenObtainPairSerializer
@@ -67,6 +70,71 @@ class RegisterCustomerAPIView(APIView):
             },
             status = status.HTTP_201_CREATED
         )
+
+class CustomerProfileAPIView(APIView):
+    
+    """
+    API for customer profile.
+    """
+    
+    permission_classes = [IsCustomer]
+    
+    def get(self, request):
+        
+        customer_profile = AccountSelectors.get_customer_profile(
+            user=request.user
+        )
+        
+        serializer = CustomProfileSerializer(
+            customer_profile
+        )
+        
+        return Response(
+            {
+                'success':True,
+                'data':serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+    
+    def put(self, request):
+        
+        profile = AccountSelectors.get_customer_profile(
+            user=request.user
+        )
+        
+        if not profile:
+            
+            return Response(
+                {
+                    'success':False,
+                    'message':'Customer Profile not found.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = CustomProfileSerializer(
+            profile,
+            data=request.data,
+            partial=True,
+        )
+        
+        serializer.is_valid(
+            raise_exception=True
+        )
+        
+        serializer.save()
+        
+        return Response(
+            {
+                'success':True,
+                'message':'Profile updated successfully.',
+                'data':serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 
 class CreateMeasurementAPIView(APIView):
     

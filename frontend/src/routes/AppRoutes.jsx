@@ -28,6 +28,9 @@ import ProtectedRoute from './ProtectedRoute';
 import UploadDesignPage from '../features/tailor/pages/UploadDesignPage';
 import TailorProfilePage from '../features/tailor/pages/TailorProfilePage';
 import StudioPortfolioPage from '../features/tailor/pages/StudioPortfolioPage';
+import CustomerLayout from '../shared/layouts/CustomerLayout';
+
+import CustomerProfile from '../features/customer/pages/CustomerProfile';
 
 export default function AppRoutes() {
     return (
@@ -45,15 +48,7 @@ export default function AppRoutes() {
                 <Route path="/register/customer" element={<RegisterPage />} />
                 <Route path="/register/tailor" element={<TailorRegister />} />
                 
-                {/* Secured Customer Personal Workspace */}
-                <Route 
-                    path="/dashboard" 
-                    element={
-                        <ProtectedRoute allowedRoles={['customer']}>
-                            <CustomerDashboard />
-                        </ProtectedRoute>
-                    } 
-                />
+                
                 
                 {/* 💡 CUSTOMER SUB-MODULE EXPANSIONS:
                     When building additional consumer screens, nest them here to retain the main header/footer:
@@ -62,6 +57,17 @@ export default function AppRoutes() {
                 */}
             </Route>
 
+            <Route element={<CustomerLayout />}>
+                <Route 
+                    path="/customer/dashboard" 
+                    element={
+                        <ProtectedRoute allowedRoles={['customer']}>
+                            <CustomerDashboard />
+                        </ProtectedRoute>
+                    } 
+                />
+                    <Route path="/customer/profile" element={<ProtectedRoute allowedRoles={['customer']}><CustomerProfile /></ProtectedRoute>} />
+            </Route>
 
             {/* 🔵 BUSINESS TAILOR WORKSPACE PORTAL SHELL */}
             <Route element={<TailorLayout />}>

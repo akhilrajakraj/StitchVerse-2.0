@@ -29,12 +29,16 @@ export default function CustomerDashboardPage() {
 
                 // Fetch data simultaneously from your Django backend
                 // (Note: Replace these URLs with your exact endpoints when you build your order/measurement views!)
-                const profileResponse = await axios.get('http://localhost:8000/api/v1/accounts/profile/me/', apiConfig);
+                const profileResponse = await axios.get('http://localhost:8000/api/v1/accounts/profile/', apiConfig);
                 
-                if (profileResponse.data) {
-                    setCustomerName(profileResponse.data.full_name);
-                    setUserMeasurements(profileResponse.data.measurements); 
-                    setActiveOrders(profileResponse.data.recent_orders || []);
+                const responseBody = profileResponse.data;
+                
+                if (responseBody.success && responseBody.data) {
+                    const profileData = responseBody.data;
+                    
+                    setCustomerName(profileData.full_name);
+                    setUserMeasurements(profileData.measurements);
+                    setActiveOrders(profileData.recent_orders || []);
                 }
 
             } catch (error) {
