@@ -44,6 +44,17 @@ export const customerApi = {
         };
         const response = await axios.put('http://localhost:8000/api/v1/accounts/profile/', profileData, config);
         return response.data
+    },
+
+    getMeasurements: async() => {
+        const token = localStorage.getItem('access_token');
+        const config = {
+            headers:{
+                'Authorization':`Bearer ${token}`,
+            }
+        };
+        const response = await axios.get('http://localhost:8000/api/v1/accounts/measurements/view/', config);
+        return response.data;
     }
 
 

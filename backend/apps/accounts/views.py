@@ -168,3 +168,29 @@ class CreateMeasurementAPIView(APIView):
             },
             status=status.HTTP_201_CREATED
         )
+        
+class ViewCustomerMeasurementsAPIView(APIView):
+    
+    """
+    API for viewing customer measurements.
+    """
+    permission_classes=[IsCustomer]
+    
+    def get(self, request):
+        
+        measurements = AccountSelectors.get_user_measurements(
+            user=request.user
+        )
+        
+        serializer = CustomerMeasurementSerializer(
+            measurements,
+            many=True
+        )
+        
+        return Response(
+            {
+                'success':True,
+                'data':serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )

@@ -30,8 +30,8 @@ export default function CustomerHeader() {
             <Link to="/customer/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
               Dashboard
             </Link>
-            <Link to="/customer/orders" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
-              Active Orders
+            <Link to="/customer/measurements" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
+              My Measurements
             </Link>
             <Link to="/customer/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
               My Profile

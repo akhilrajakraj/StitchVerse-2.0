@@ -31,6 +31,7 @@ import StudioPortfolioPage from '../features/tailor/pages/StudioPortfolioPage';
 import CustomerLayout from '../shared/layouts/CustomerLayout';
 
 import CustomerProfile from '../features/customer/pages/CustomerProfile';
+import CustomerMeasurements from '../features/customer/pages/CustomerMeasurements';
 
 export default function AppRoutes() {
     return (
@@ -66,6 +67,7 @@ export default function AppRoutes() {
                         </ProtectedRoute>
                     } 
                 />
+                    <Route path="/customer/measurements" element={<ProtectedRoute allowedRoles={['customer']}><CustomerMeasurements /></ProtectedRoute>} />
                     <Route path="/customer/profile" element={<ProtectedRoute allowedRoles={['customer']}><CustomerProfile /></ProtectedRoute>} />
             </Route>
 
