@@ -2,7 +2,8 @@ from .models import (
     CustomUser,
     CustomerProfile,
     UserRole,
-    UserStatus, 
+    UserStatus,
+    Measurement, 
 )
 
 class AccountSelectors:
@@ -45,6 +46,15 @@ class AccountSelectors:
         Get User Measurements.
         """
         return user.measurements.all()
+    
+    @staticmethod
+    def get_measurement_by_id(measurement_id):
+        """
+        Get Measurement by ID.
+        """
+        return Measurement.objects.filter(
+            id=measurement_id
+        ).first()
     
         
         

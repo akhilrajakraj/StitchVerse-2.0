@@ -194,3 +194,54 @@ class ViewCustomerMeasurementsAPIView(APIView):
             },
             status=status.HTTP_200_OK
         )
+    
+class UpdateMeasurementAPIView(APIView):
+    
+    """
+    API for updating customer measurements.
+    """
+    
+    permission_classes=[IsCustomer]
+    
+    def put(self, request, measurement_id):
+        
+        measurement = AccountSelectors.get_measurement_by_id(
+            measurement_id=measurement_id
+        )
+        
+        if not measurement:
+            
+            return Response(
+                {
+                    'success':False,
+                    'message':'Measurement not found.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = AddCustomerMeasurementSerializer(
+            measurement,
+            data=request.data,
+            partial=True,
+        )
+        
+        serializer.is_valid(raise_exception=True)
+        
+        updated_measurement = AccountService.update_measurement(
+            measurement=measurement,
+            updated_data=serializer.validated_data
+        )
+        
+        response_serializer = CustomerMeasurementSerializer(
+            updated_measurement
+        )
+        
+        return Response(
+            {
+                'success':True,
+                'message':'Measurement Updated Successfully.',
+                'data':response_serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+    

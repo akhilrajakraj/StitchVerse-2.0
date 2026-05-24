@@ -13,7 +13,7 @@ export const customerApi = {
         const config = {
             headers: {
                 'Content-Type':'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
 
             }
         };
@@ -26,7 +26,7 @@ export const customerApi = {
         const token = localStorage.getItem('access_token');
         const config = {
             headers:{
-                'Authorization':`Bearer ${token}`
+                'Authorization':`Bearer ${token}`,
             }
         };
 
@@ -54,6 +54,18 @@ export const customerApi = {
             }
         };
         const response = await axios.get('http://localhost:8000/api/v1/accounts/measurements/view/', config);
+        return response.data;
+    },
+
+    updateMeasurements: async(measurementId, updatedFormData) => {
+        const token = localStorage.getItem('access_token');
+        const config = {
+            headers:{
+                'Authorization':`Bearer ${token}`,
+                'Content-Type':'application/json',
+            }
+        };
+        const response = await axios.put(`http://localhost:8000/api/v1/accounts/measurements/update/${measurementId}/`, updatedFormData, config);
         return response.data;
     }
 

@@ -10,6 +10,7 @@ from .views import(
     CreateMeasurementAPIView,
     CustomerProfileAPIView,
     ViewCustomerMeasurementsAPIView,
+    UpdateMeasurementAPIView,
 )
 
 urlpatterns = [
@@ -48,5 +49,11 @@ urlpatterns = [
         'measurements/view/',
         ViewCustomerMeasurementsAPIView.as_view(),
         name='view_measurements',
+    ),
+    
+    path(
+        'measurements/update/<uuid:measurement_id>/',
+        UpdateMeasurementAPIView.as_view(),
+        name='update_measurement',
     )
 ]

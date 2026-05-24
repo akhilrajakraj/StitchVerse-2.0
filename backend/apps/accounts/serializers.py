@@ -195,6 +195,7 @@ class CustomerMeasurementSerializer(serializers.ModelSerializer):
         model = Measurement
         
         fields = [
+            'id',
             'customer',
             'label',
             'height_cm',
@@ -221,6 +222,7 @@ class CustomerMeasurementSerializer(serializers.ModelSerializer):
         ]
         
         read_only_fields = [
+            'id',
             'customer',
             'created_at',
             'updated_at',
