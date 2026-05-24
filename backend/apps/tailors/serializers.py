@@ -135,3 +135,37 @@ class RegisterTailorSerializer(serializers.ModelSerializer):
 
         return value
 
+class TailorListSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for listing tailors.
+    """
+
+    user = UserSerializer(read_only=True)
+
+    address = AddressSerializer()
+
+    class Meta:
+
+        model = TailorProfile
+
+        fields = [
+            'id',
+            'user',
+            'full_name',
+            'phone',
+            'address',
+            'specialisation',
+            'qualification',
+            'bio',
+            'average_rating',
+            'total_orders',
+            'created_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'average_rating',
+            'total_orders',
+            'created_at',
+        ]

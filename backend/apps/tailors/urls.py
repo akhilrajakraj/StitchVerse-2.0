@@ -4,6 +4,7 @@ from django.urls import path
 from .views import(
     RegisterTailorAPIView,
     TailorProfileAPIView,
+    TailorListAPIView,
 )
 
 urlpatterns = [
@@ -18,5 +19,11 @@ urlpatterns = [
         'profile/',
         TailorProfileAPIView.as_view(),
         name='tailor_profile',
-        )
+    ),
+    
+    path(
+        'list/',
+        TailorListAPIView.as_view(),
+        name='tailor_list',
+    )
 ]

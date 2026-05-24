@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import(
     RegisterTailorSerializer,
     TailorProfileSerializer,
+    TailorListSerializer,
 )
 
 from .services import (
@@ -134,3 +135,28 @@ class TailorProfileAPIView(APIView):
             status=status.HTTP_200_OK
         )
 
+class TailorListAPIView(APIView):
+    
+    """
+    API for listing all active tailors.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        
+        tailors = TailorSelectors.get_all_tailors(
+            user=request.user
+        )
+        
+        serializer = TailorListSerializer(
+            tailors,
+            many=True
+        )
+        
+        return Response(
+            {
+                'success':True,
+                'data':serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )

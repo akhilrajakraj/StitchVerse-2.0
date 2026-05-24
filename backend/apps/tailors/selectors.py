@@ -68,6 +68,17 @@ class TailorSelectors:
             specialisation=specialisation
         ).all()
         
+    @staticmethod
+    def get_all_tailors(user):
+        
+        """
+        Get all active tailors.
+        """
+        return TailorProfile.objects.filter(
+            approval_status=TailorApprovalStatus.APPROVED or TailorApprovalStatus.ACTIVE,
+        ).exclude(
+            user=user)
+        
         
         
     
