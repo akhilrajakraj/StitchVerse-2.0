@@ -97,7 +97,7 @@ export default function CustomerDashboardPage() {
                     <p className="text-gray-600 dark:text-gray-400 text-sm">Start a fresh custom order from scratch.</p>
                 </Link>
 
-                <Link to="/for-tailors" className="group bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-xl dark:shadow-none border border-gray-100 dark:border-gray-700 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+                <Link to="/customer/explore-tailors" className="group bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-xl dark:shadow-none border border-gray-100 dark:border-gray-700 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
                     <div className="w-14 h-14 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i className="ri-search-eye-line text-3xl"></i>
                     </div>

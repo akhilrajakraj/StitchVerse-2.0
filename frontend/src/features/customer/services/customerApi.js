@@ -67,6 +67,17 @@ export const customerApi = {
         };
         const response = await axios.put(`http://localhost:8000/api/v1/accounts/measurements/update/${measurementId}/`, updatedFormData, config);
         return response.data;
+    },
+
+    getActiveTailors: async () => {
+        const token = localStorage.getItem('access_token');
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        };
+        const response = await axios.get(`${BASE_URL}/tailors/list/`, config);
+        return response.data;
     }
 
 
