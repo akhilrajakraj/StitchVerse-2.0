@@ -60,8 +60,9 @@ export function useCustomerMeasurements() {
             setIsLoading(false);
         }
     }, [setFormDataFields]);
-
+    
     useEffect(() => {
+        // eslint-disable-next-line
         loadAllCustomerMeasurements();
     }, [loadAllCustomerMeasurements]);
 
