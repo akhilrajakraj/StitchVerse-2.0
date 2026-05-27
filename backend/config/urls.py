@@ -36,6 +36,11 @@ urlpatterns = [
         'api/v1/designs/',
         include('apps.designs.urls')
     ),
+    
+    path(
+        'api/v1/orders/',
+        include('apps.orders.urls')
+    )
 ]
 
 urlpatterns += static(

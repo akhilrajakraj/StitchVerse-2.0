@@ -89,7 +89,7 @@ export default function CustomerDashboardPage() {
 
             {/* --- QUICK ACTIONS GRID --- */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <Link to="/custom-order" className="group bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-xl dark:shadow-none border border-gray-100 dark:border-gray-700 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+                <Link to="/customer/new-stitch-request" className="group bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-xl dark:shadow-none border border-gray-100 dark:border-gray-700 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
                     <div className="w-14 h-14 bg-pink-100 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i className="ri-magic-line text-3xl"></i>
                     </div>

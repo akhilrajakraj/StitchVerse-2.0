@@ -27,6 +27,32 @@ class DesignOrderStatus(models.TextChoices):
     SHIPPED         = 'shipped',         'Shipped'
     DELIVERED       = 'delivered',       'Delivered'
     CANCELLED       = 'cancelled',       'Cancelled'
+    
+
+# ──────────────────────────────────────────────
+# THE OUTFIT CONFIGURATION (New Model)
+# ──────────────────────────────────────────────
+class GarmentCategory(models.Model):
+    """
+    Stores the configuration for each outfit type, including the 
+    specific measurements required when a customer selects it.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)        # e.g., "Anarkali Suit"
+    department = models.CharField(max_length=50)   # e.g., "Women's Wear"
+    
+    # This JSON array tells the frontend exactly which input boxes to pop out!
+    # Example: ["height", "shoulder", "chest", "bust", "waist", "hip"]
+    required_measurements = models.JSONField(default=list)
+    
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'garment_categories'
+        verbose_name_plural = 'Garment Categories'
+
+    def __str__(self):
+        return f"{self.department} - {self.name}"
 
 # ──────────────────────────────────────────────
 # STITCH REQUESTS — Custom tailoring orders (orders app)
@@ -43,11 +69,11 @@ class StitchRequest(models.Model):
     tailor           = models.ForeignKey(CustomUser, on_delete=models.SET_NULL,
                                          null=True, blank=True, related_name='received_requests')
     name             = models.CharField(max_length=255)           # garment name / title
-    garment_type     = models.CharField(max_length=100)           # Shirt, Skirt, Trouser …
+    garment_type     = models.ForeignKey(GarmentCategory, on_delete=models.PROTECT, related_name='stitch_requests')
     fabric           = models.CharField(max_length=100)
     color            = models.CharField(max_length=80, blank=True)
     pattern          = models.CharField(max_length=80, blank=True)
-    design_details   = models.TextField()
+    design_details   = models.JSONField(default=dict, blank=True)  # Additional design instructions or preferences
     instructions     = models.TextField(blank=True)
     measurement      = models.ForeignKey(Measurement, on_delete=models.SET_NULL, null=True, blank=True)
     reference_design = models.ForeignKey(Design, on_delete=models.SET_NULL, null=True, blank=True)
