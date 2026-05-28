@@ -6,9 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import (
     CreateStitchRequestSerializer,
     GarmentCategorySerializer,
+    StitchRequestDetailSerializer,
 )
 from .services import (
     StitchRequestServices,
+)
+
+from .selectors import (
+    StitchRequestSelectors,
 )
 
 class GarmentCategoryListAPIView(APIView):
@@ -75,3 +80,40 @@ class CreateStitchRequestAPIView(APIView):
             },
             status=status.HTTP_201_CREATED
         )
+
+class CustomerStitchRequestDetailAPIView(APIView):
+    
+    """
+    API for customers to view details of their stitch requests.
+    """
+    
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        
+        stitch_request = StitchRequestSelectors.get_stitch_requests_by_customer(
+            customer=request.user
+        )
+        
+        if not stitch_request:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Stitch request not found or access denied.',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = StitchRequestDetailSerializer(
+            stitch_request,
+            many=True
+        )
+        
+        return Response(
+            {
+                'success': True,
+                'stitch_requests': serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
+    

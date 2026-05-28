@@ -3,6 +3,7 @@ from django.urls import path
 from .views import(
     CreateStitchRequestAPIView,
     GarmentCategoryListAPIView,
+    CustomerStitchRequestDetailAPIView,
 )
 
 urlpatterns = [
@@ -17,5 +18,11 @@ urlpatterns = [
         'garment-categories/',
         GarmentCategoryListAPIView.as_view(),
         name='garment_category_list',
+    ),
+    
+    path(
+        'my-stitchreq/',
+        CustomerStitchRequestDetailAPIView.as_view(),
+        name='stitchreq_detail',
     )
 ]

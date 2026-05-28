@@ -210,7 +210,7 @@ export default function CustomerDashboardPage() {
                                 </div>
                             </div>
 
-                            <Link to="/measurements/update" className="w-full block text-center bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 py-3 rounded-xl font-bold hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors border border-purple-200 dark:border-purple-500/30">
+                            <Link to="/customer/measurements" className="w-full block text-center bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 py-3 rounded-xl font-bold hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors border border-purple-200 dark:border-purple-500/30">
                                 Modify Fit Dimensions
                             </Link>
                         </div>

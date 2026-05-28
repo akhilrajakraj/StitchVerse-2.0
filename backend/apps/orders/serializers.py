@@ -242,4 +242,47 @@ class CreateStitchRequestSerializer(serializers.ModelSerializer):
 
         return value
 
+class StitchRequestDetailSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for stitch request details.
+    """
+
+    images = StitchRequestImageSerializer(many=True, read_only=True)
+    customer = UserSerializer(read_only=True)
+    tailor = UserSerializer(read_only=True)
+    garment_type = GarmentCategorySerializer(read_only=True)
+
+    class Meta:
+
+        model = StitchRequest
+
+        fields = [
+            'id',
+            'customer',
+            'tailor',
+            'name',
+            'garment_type',
+            'fabric',
+            'color',
+            'pattern',
+            'design_details',
+            'instructions',
+            'measurement',
+            'reference_design',
+            'expected_date',
+            'quoted_price',
+            'status',
+            'submitted_at',
+            'updated_at',
+            'images',  # Nested images
+        ]
+
+        read_only_fields = [
+            'id',
+            'customer',  # Set from request.user in view
+            'tailor',    # Set from view logic
+            'submitted_at',
+            'updated_at',
+        ]
 

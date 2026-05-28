@@ -33,6 +33,9 @@ export default function CustomerHeader() {
             <Link to="/customer/measurements" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
               My Measurements
             </Link>
+            <Link to="/customer/stitch-request-details" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
+              Stitch Request Details
+            </Link>
             <Link to="/customer/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
               My Profile
             </Link>

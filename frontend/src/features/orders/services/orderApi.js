@@ -42,5 +42,21 @@ export const orderApi = {
 
         const response = await axios.post(`${BASE_URL}/orders/stitchreq/`, formData, config);
         return response.data;
+    },
+
+    fetchMyStitchRequests: async () => {
+        const token = localStorage.getItem('access_token');
+        if(!token){
+            throw new Error("No Authentication credentials key detected.");
+        }
+
+        const config = {
+            headers:{
+                'Authorization': `Bearer ${token}`
+            }
+        };
+
+        const response = await axios.get(`${BASE_URL}/orders/my-stitchreq/`, config);
+        return response.data;
     }
 };
