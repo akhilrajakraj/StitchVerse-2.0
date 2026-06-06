@@ -4,6 +4,7 @@ from .views import(
     CreateStitchRequestAPIView,
     GarmentCategoryListAPIView,
     CustomerStitchRequestDetailAPIView,
+    DetailedStitchRequestAPIView,
 )
 
 urlpatterns = [
@@ -24,5 +25,11 @@ urlpatterns = [
         'my-stitchreq/',
         CustomerStitchRequestDetailAPIView.as_view(),
         name='stitchreq_detail',
+    ),
+    
+    path(
+        'stitchreq/<uuid:stitch_request_id>/',
+        DetailedStitchRequestAPIView.as_view(),
+        name='detailed_stitchreq',
     )
 ]

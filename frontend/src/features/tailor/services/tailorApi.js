@@ -36,7 +36,7 @@ export const tailorApi = {
             }
         };
 
-        const response = await axios.get('http://localhost:8000/api/v1/tailors/profile/', config);
+        const response = await axios.get(`${BASE_URL}/tailors/profile/`, config);
         return response.data;
     },
 
@@ -48,7 +48,7 @@ export const tailorApi = {
                 'Content-Type': 'application/json'
             }
         };
-        const response = await axios.put('http://localhost:8000/api/v1/tailors/profile/', profileData, config);
+        const response = await axios.put(`${BASE_URL}/tailors/profile/`, profileData, config);
         return response.data
     },
 

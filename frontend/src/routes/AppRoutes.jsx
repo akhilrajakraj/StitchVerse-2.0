@@ -35,6 +35,7 @@ import CustomerMeasurements from '../features/customer/pages/CustomerMeasurement
 import ExploreTailors from '../features/customer/pages/ExploreTailors';
 import NewStitchRequest from '../features/orders/pages/NewStitchRequest';
 import CustomerDashboardList from '../features/orders/pages/CustomerDashboardList';
+import CustomerStitchReqDetails from '../features/orders/pages/CustomerStitchReqDetails';
 
 export default function AppRoutes() {
     return (
@@ -74,6 +75,7 @@ export default function AppRoutes() {
                     <Route path="/customer/profile" element={<ProtectedRoute allowedRoles={['customer']}><CustomerProfile /></ProtectedRoute>} />
                     <Route path="/customer/new-stitch-request" element={<ProtectedRoute allowedRoles={['customer']}><NewStitchRequest /></ProtectedRoute>} />
                     <Route path="/customer/stitch-request-details" element={<ProtectedRoute allowedRoles={['customer']}><CustomerDashboardList /></ProtectedRoute>} />
+                    <Route path="/customer/stitch-request-details/:id" element={<ProtectedRoute allowedRoles={['customer']}><CustomerStitchReqDetails /></ProtectedRoute>} />
                     <Route path="/customer/explore-tailors" element={<ProtectedRoute allowedRoles={['customer']}><ExploreTailors /></ProtectedRoute>} />
             </Route>
 

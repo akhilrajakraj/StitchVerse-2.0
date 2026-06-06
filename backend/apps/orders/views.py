@@ -116,4 +116,39 @@ class CustomerStitchRequestDetailAPIView(APIView):
             },
             status=status.HTTP_200_OK
         )
+        
+class DetailedStitchRequestAPIView(APIView):
+    
+    """
+    API for customers to view details of a specific stitch request.
+    """
+    
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, stitch_request_id):
+        
+        stitch_request = StitchRequestSelectors.get_stitch_request_by_id(
+            stitch_request_id=stitch_request_id
+        )
+        
+        if not stitch_request or stitch_request.customer != request.user:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Stitch request not found or access denied.',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = StitchRequestDetailSerializer(
+            stitch_request
+        )
+        
+        return Response(
+            {
+                'success': True,
+                'stitch_request': serializer.data,
+            },
+            status=status.HTTP_200_OK
+        )
     
