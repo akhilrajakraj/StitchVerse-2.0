@@ -22,7 +22,6 @@ class StitchRequestServices:
     
     @staticmethod
     @transaction.atomic
-    
     def create_stitch_request(
         customer,
         tailor,
@@ -36,8 +35,10 @@ class StitchRequestServices:
         measurement,
         reference_design,
         expected_date,
+        uploaded_images=None, # 🚨 ADDED: Parameter to catch the files
     ):
         
+        # 1. Create the main Order
         stitch_request = StitchRequest.objects.create(
             customer=customer,
             tailor=tailor,
@@ -53,4 +54,15 @@ class StitchRequestServices:
             expected_date=expected_date,
         )
         
+        # 2. Loop through the array of files and save them to the Image table!
+        if uploaded_images:
+            # We import it here locally if it isn't imported at the top of your file
+            from .models import StitchRequestImage 
+            
+            for image_file in uploaded_images:
+                StitchRequestImage.objects.create(
+                    stitch_request=stitch_request,
+                    image=image_file
+                )
+                
         return stitch_request

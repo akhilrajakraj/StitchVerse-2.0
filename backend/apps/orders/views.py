@@ -53,6 +53,9 @@ class CreateStitchRequestAPIView(APIView):
             data=request.data
         )
         
+        if not serializer.is_valid():
+            print("Validation Failed", serializer.errors)
+        
         serializer.is_valid(
             raise_exception=True
         )
@@ -70,6 +73,7 @@ class CreateStitchRequestAPIView(APIView):
             measurement=serializer.validated_data.get('measurement'),
             reference_design=serializer.validated_data.get('reference_design'),
             expected_date=serializer.validated_data.get('expected_date'),
+            uploaded_images=request.FILES.getlist('uploaded_images')
         )
         
         return Response(
@@ -106,7 +110,8 @@ class CustomerStitchRequestDetailAPIView(APIView):
         
         serializer = StitchRequestDetailSerializer(
             stitch_request,
-            many=True
+            many=True,
+            context={'request': request}
         )
         
         return Response(
@@ -141,7 +146,8 @@ class DetailedStitchRequestAPIView(APIView):
             )
         
         serializer = StitchRequestDetailSerializer(
-            stitch_request
+            stitch_request,
+            context={'request': request}
         )
         
         return Response(

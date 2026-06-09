@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useCustomRequest } from '../hooks/useCustomRequest';
+import { useTailors } from '../hooks/useTailors'; // 🚨 IMPORT THE HR MANAGER
 
 export default function CustomRequestForm() {
-    // 1. Bring in the Upgraded Store Manager
-    // Defensive Programming: We default categories to an empty array [] to prevent map() crashes!
+    // 1. Bring in the Store Manager (For Categories and Submitting)
     const { 
         categories = [], 
         isFetchingCategories, 
@@ -14,7 +14,14 @@ export default function CustomRequestForm() {
         isSuccess 
     } = useCustomRequest();
 
-    // 2. Standard Text Inputs (Now with Color, Pattern, Instructions, and Date!)
+    // 2. Bring in the HR Manager (For Tailors)
+    const { 
+        tailors = [], 
+        isLoadingTailors,
+        tailorError
+    } = useTailors();
+
+    // 3. Standard Text Inputs
     const [requestName, setRequestName] = useState('');
     const [fabric, setFabric] = useState('');
     const [color, setColor] = useState('');
@@ -23,31 +30,45 @@ export default function CustomRequestForm() {
     const [expectedDate, setExpectedDate] = useState('');
     const [images, setImages] = useState([]);
     
-    // 3. The Dynamic States
+    // 4. Recovered Design Preferences
+    const [fitPreference, setFitPreference] = useState('Regular');
+    const [necklineStyle, setNecklineStyle] = useState('');
+
+    // 5. The Tailor State
+    const [targetTailorId, setTargetTailorId] = useState(''); 
+    
+    // 6. The Dynamic States
     const [selectedCategoryId, setSelectedCategoryId] = useState('');
     const [dynamicMeasurements, setDynamicMeasurements] = useState({});
 
-    // Defensive Check: Safely find the category only if the array actually exists
+    // Defensive Check
     const selectedCategory = categories?.find(c => c.id === selectedCategoryId) || null;
 
-    // 4. The Submit Handler
+    // 7. The Submit Handler
     const handleSubmit = async (e) => {
         e.preventDefault(); 
         const payload = new FormData();
 
-        // Required Fields
+        // Required Core Fields
         payload.append('name', requestName);
         payload.append('garment_type', selectedCategoryId);
         payload.append('fabric', fabric);
         
-        // Optional Fields: Only append them if the user actually typed something!
+        // Optional Database Fields
         if (color) payload.append('color', color);
         if (pattern) payload.append('pattern', pattern);
         if (instructions) payload.append('instructions', instructions);
         if (expectedDate) payload.append('expected_date', expectedDate);
+        if (targetTailorId) payload.append('tailor', targetTailorId); // Attach the chosen tailor!
         
-        // Dynamic JSON Measurements
-        const finalDesignDetails = { measurements: dynamicMeasurements };
+        // Pack both measurements AND style preferences cleanly into JSON
+        const finalDesignDetails = { 
+            measurements: dynamicMeasurements,
+            style_preferences: {
+                fit: fitPreference,
+                neckline: necklineStyle
+            }
+        };
         payload.append('design_details', JSON.stringify(finalDesignDetails));
 
         // Images
@@ -62,20 +83,19 @@ export default function CustomRequestForm() {
         }
     };
 
-    // 5. The Isolated Form UI (The Furniture)
     return (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div className="p-5 md:p-8">
                 
-                {/* SAFE LOADING STATE */}
-                {isFetchingCategories ? (
+                {/* Safe Loading State handling BOTH managers */}
+                {(isFetchingCategories || isLoadingTailors) ? (
                     <div className="flex flex-col items-center justify-center py-12">
                         <i className="ri-loader-4-line animate-spin text-4xl text-purple-500 mb-4"></i>
-                        <p className="text-gray-500 dark:text-gray-400 font-medium">Loading garment catalog...</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">Loading store catalogs...</p>
                     </div>
-                ) : fetchError ? (
+                ) : (fetchError || tailorError) ? (
                     <div className="p-4 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 rounded-xl text-center">
-                        {fetchError}
+                        {fetchError || tailorError}
                     </div>
                 ) : isSuccess ? (
                     <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-8 text-center animate-pulse">
@@ -182,7 +202,52 @@ export default function CustomRequestForm() {
                                 />
                             </div>
 
-                            {/* NEW: Color and Pattern */}
+                            {/* 🚨 THE NEW COMPONENT: Tailor Selection Dropdown 🚨 */}
+                            <div className="md:col-span-1">
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Assign to Tailor (Optional)</label>
+                                <select 
+                                    value={targetTailorId}
+                                    onChange={(e) => setTargetTailorId(e.target.value)}
+                                    className="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white outline-none appearance-none"
+                                >
+                                    <option value="">-- Let StitchVerse assign one --</option>
+                                    {tailors?.map((tailor) => (
+                                        <option key={tailor.id} value={tailor.user?.id}>
+                                            {/* Adjust based on what your backend user model returns (e.g., username, first_name) */}
+                                            {tailor.username || tailor.full_name || tailor.id} 
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* RECOVERED: Fit Preference */}
+                            <div className="md:col-span-1">
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Desired Fit</label>
+                                <select 
+                                    value={fitPreference}
+                                    onChange={(e) => setFitPreference(e.target.value)}
+                                    className="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white outline-none appearance-none"
+                                >
+                                    <option value="Regular">Regular Fit</option>
+                                    <option value="Slim">Slim Fit</option>
+                                    <option value="Loose">Loose / Oversized</option>
+                                    <option value="Tailored">Perfect Tailored</option>
+                                </select>
+                            </div>
+
+                            {/* RECOVERED: Neckline/Collar */}
+                            <div className="md:col-span-1">
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Collar / Neckline Style (Optional)</label>
+                                <input 
+                                    type="text" 
+                                    value={necklineStyle}
+                                    onChange={(e) => setNecklineStyle(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white outline-none"
+                                    placeholder="e.g., V-Neck, Mandarin Collar"
+                                />
+                            </div>
+
+                            {/* Color */}
                             <div className="md:col-span-1">
                                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Color (Optional)</label>
                                 <input 
@@ -194,6 +259,7 @@ export default function CustomRequestForm() {
                                 />
                             </div>
 
+                            {/* Pattern */}
                             <div className="md:col-span-1">
                                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Pattern (Optional)</label>
                                 <input 
@@ -205,19 +271,19 @@ export default function CustomRequestForm() {
                                 />
                             </div>
 
-                            {/* NEW: Expected Delivery Date */}
+                            {/* Expected Delivery Date */}
                             <div className="md:col-span-1">
                                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Desired Delivery Date (Optional)</label>
                                 <input 
                                     type="date" 
                                     value={expectedDate}
-                                    min={new Date().toISOString().split('T')[0]} // Prevents picking past dates!
+                                    min={new Date().toISOString().split('T')[0]} 
                                     onChange={(e) => setExpectedDate(e.target.value)}
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white outline-none"
                                 />
                             </div>
 
-                            {/* NEW: Special Instructions */}
+                            {/* Special Instructions */}
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Special Instructions (Optional)</label>
                                 <textarea 
@@ -225,7 +291,7 @@ export default function CustomRequestForm() {
                                     onChange={(e) => setInstructions(e.target.value)}
                                     rows="3"
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 transition-all bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white outline-none"
-                                    placeholder="e.g., Please add extra lining, make the collar slightly wider..."
+                                    placeholder="e.g., Please add extra lining..."
                                 ></textarea>
                             </div>
                         </div>
@@ -258,7 +324,8 @@ export default function CustomRequestForm() {
                         <div className="border-t border-gray-100 dark:border-gray-700 pt-6 md:pt-8 flex justify-end">
                             <button 
                                 type="submit" 
-                                disabled={isSubmitting || isFetchingCategories}
+                                /* 🚨 Button disabled if EITHER manager is loading or submitting 🚨 */
+                                disabled={isSubmitting || isFetchingCategories || isLoadingTailors}
                                 className={`w-full md:w-auto px-8 py-3.5 md:py-3 rounded-xl text-white font-bold text-lg shadow-lg shadow-purple-500/30 transition-all flex justify-center items-center gap-2 transform md:hover:-translate-y-0.5
                                     ${isSubmitting ? 'bg-purple-400 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600'}`}
                             >

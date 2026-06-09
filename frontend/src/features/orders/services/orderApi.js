@@ -74,5 +74,21 @@ export const orderApi = {
 
         const response = await axios.get(`${BASE_URL}/orders/stitchreq/${requestId}/`, config);
         return response.data;
+    },
+
+    fetchAllTailors: async () => {
+        const token = localStorage.getItem('access_token');
+        if(!token){
+            throw new Error("No Authentication credentials key detected.");
+        }
+
+        const config = {
+            headers:{
+                'Authorization': `Bearer ${token}`
+            }
+        };
+
+        const response = await axios.get(`${BASE_URL}/tailors/list/`, config);
+        return response.data;
     }
 };
