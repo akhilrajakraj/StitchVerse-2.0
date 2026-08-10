@@ -1,9 +1,12 @@
 from django.db import transaction
 from django.utils import timezone
 
-from apps.accounts.models import CustomUser, UserRole
+from apps.accounts.models import UserRole
 
 from .models import Dispute, DisputeStatus, SupportTicket, SupportTicketMessage, SupportTicketStatus
+
+
+_UNSET = object()
 
 
 class SupportService:
@@ -15,22 +18,20 @@ class SupportService:
     @staticmethod
     @transaction.atomic
     def add_message(*, ticket, sender, body, attachment=None):
-        return SupportTicketMessage.objects.create(
-            ticket=ticket, sender=sender, body=body, attachment=attachment
-        )
+        return SupportTicketMessage.objects.create(ticket=ticket, sender=sender, body=body, attachment=attachment)
 
     @staticmethod
     @transaction.atomic
-    def update_ticket(*, ticket, actor, status=None, priority=None, assigned_to=None):
+    def update_ticket(*, ticket, actor, status=None, priority=None, assigned_to=_UNSET):
         if status is not None:
             if status == SupportTicketStatus.RESOLVED:
                 ticket.resolved_at = timezone.now()
-            elif ticket.status == SupportTicketStatus.RESOLVED and status != SupportTicketStatus.RESOLVED:
+            elif ticket.status == SupportTicketStatus.RESOLVED:
                 ticket.resolved_at = None
             ticket.status = status
         if priority is not None:
             ticket.priority = priority
-        if assigned_to is not None:
+        if assigned_to is not _UNSET:
             ticket.assigned_to = assigned_to
         ticket.save(update_fields=['status', 'priority', 'assigned_to', 'resolved_at'])
         return ticket
