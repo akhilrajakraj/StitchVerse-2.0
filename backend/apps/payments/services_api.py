@@ -3,9 +3,9 @@ from decimal import Decimal
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from apps.orders.models import DesignOrder, StitchRequest
+from apps.orders.models import DesignOrder, DesignOrderStatus, StitchRequest
 
-from .models import Payment, PaymentMode, PaymentStatus, Refund
+from .models import Payment, PaymentStatus, Refund
 from .services import PaymentService
 
 
@@ -25,12 +25,14 @@ class PaymentAPIServices:
             if order.quoted_price is None or Decimal(order.quoted_price) <= 0:
                 raise ValidationError('A valid quotation is required before payment.')
             amount = Decimal(order.quoted_price)
-            existing = Payment.objects.filter(stitch_request=order, status=PaymentStatus.PAID).exists()
-            if existing:
+            if Payment.objects.filter(stitch_request=order, status=PaymentStatus.PAID).exists():
                 raise ValidationError('This stitch request has already been paid.')
             return Payment.objects.create(
-                payer=payer, stitch_request=order, amount=amount,
-                payment_mode=payment_mode, currency='INR',
+                payer=payer,
+                stitch_request=order,
+                amount=amount,
+                payment_mode=payment_mode,
+                currency='INR',
             )
 
         order = DesignOrder.objects.select_for_update().filter(
@@ -38,14 +40,16 @@ class PaymentAPIServices:
         ).first()
         if not order:
             raise ValidationError('Design order not found.')
-        if order.status != 'payment_pending':
+        if order.status != DesignOrderStatus.PAYMENT_PENDING:
             raise ValidationError('This design order is not awaiting payment.')
-        existing = Payment.objects.filter(design_order=order, status=PaymentStatus.PAID).exists()
-        if existing:
+        if Payment.objects.filter(design_order=order, status=PaymentStatus.PAID).exists():
             raise ValidationError('This design order has already been paid.')
         return Payment.objects.create(
-            payer=payer, design_order=order, amount=Decimal(order.total_amount),
-            payment_mode=payment_mode, currency='INR',
+            payer=payer,
+            design_order=order,
+            amount=Decimal(order.total_amount),
+            payment_mode=payment_mode,
+            currency='INR',
         )
 
     @staticmethod
@@ -59,7 +63,9 @@ class PaymentAPIServices:
             gateway_signature=gateway_signature,
         )
         if paid.design_order_id:
-            DesignOrder.objects.filter(id=paid.design_order_id).update(status='confirmed')
+            DesignOrder.objects.filter(id=paid.design_order_id).update(
+                status=DesignOrderStatus.PAID
+            )
         return paid
 
     @staticmethod
