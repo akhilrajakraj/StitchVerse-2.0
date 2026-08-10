@@ -13,6 +13,11 @@ jobs:
       run:
         working-directory: backend
 
+    env:
+      SECRET_KEY: ci-only-secret-key-not-for-production
+      DJANGO_SETTINGS_MODULE: config.settings.development
+      DEBUG: 'False'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
