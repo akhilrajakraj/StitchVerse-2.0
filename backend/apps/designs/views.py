@@ -1,136 +1,105 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from .models import Design, DesignCategory
+from .selectors import DesignSelectors
 from .serializers import (
     CreateDesignSerializer,
     DesignCategorySerializer,
     DesignSerializer,
 )
+from .services import DesignServices
 
-from .models import (
-    Design,
-    DesignCategory,
-)
 
-from .services import (
-    DesignServices,
-)
+class DesignListAPIView(APIView):
+    """Public marketplace listing with lightweight filtering."""
+    permission_classes = [AllowAny]
 
-from .selectors import(
-    DesignSelectors,
-)
+    def get(self, request):
+        designs = DesignSelectors.get_active_designs(
+            search=request.query_params.get('search'),
+            category=request.query_params.get('category'),
+            tailor=request.query_params.get('tailor'),
+            min_price=request.query_params.get('min_price'),
+            max_price=request.query_params.get('max_price'),
+        )
+        return Response(
+            {'success': True, 'data': DesignSerializer(designs, many=True).data},
+            status=status.HTTP_200_OK,
+        )
+
+
+class DesignDetailAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, design_id):
+        design = DesignSelectors.get_design_by_id(design_id, active_only=True)
+        if not design:
+            return Response({'detail': 'Design not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {'success': True, 'data': DesignSerializer(design).data},
+            status=status.HTTP_200_OK,
+        )
+
+
 class CreateDesignAPIView(APIView):
-    
-    """
-    API for tailor uploading design.
-    """
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        
-        serializer = CreateDesignSerializer(
-            data = request.data
-        )
-        
-        serializer.is_valid(
-            raise_exception=True
-        )
-        
+        serializer = CreateDesignSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         design = DesignServices.create_design(
             tailor=request.user,
-            category=serializer.validated_data['category'],
-            name=serializer.validated_data['name'],
-            description=serializer.validated_data['description'],
-            price=serializer.validated_data['price']
+            **serializer.validated_data,
         )
-        
         images = request.FILES.getlist('images')
         if images:
-            DesignServices.upload_design_images(
-                design=design,
-                images=images
-            )
-        
+            DesignServices.upload_design_images(design, images)
         return Response(
-            {
-                'success':True,
-                'message': 'Design Uploaded Successfully.',
-                'design_id': design.id,
-            },
-            status=status.HTTP_201_CREATED
+            {'success': True, 'message': 'Design uploaded successfully.', 'design_id': design.id},
+            status=status.HTTP_201_CREATED,
         )
-        
+
+
 class DesignCategoryListAPIView(APIView):
-    """
-    API endpoint for public retrieval of the dynamic design categories taxonomy tree.
-    """
-    permission_classes = [AllowAny] # 🔓 No authentication required for reading categories
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        # Fetch root categories (categories without a parent) to handle nested trees,
-        # or grab all categories directly. Let's pull all seeded entries:
-        categories = DesignCategory.objects.all()
-        
-        # Serialize database entries into standard clean JSON formats
-        serializer = DesignCategorySerializer(categories, many=True)
-        
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        categories = DesignCategory.objects.all().order_by('name')
+        return Response(DesignCategorySerializer(categories, many=True).data)
+
 
 class TailorDesignListAPIView(APIView):
-    
-    """
-    API Endpoint for retreiving respective tailors portfolio.
-    """
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
-        
-        designs = DesignSelectors.get_tailor_designs(
-            tailor=request.user
-        )
-        
-        serializer = DesignSerializer(
-            designs,
-            many=True
-        )
-        
-        return Response(
-            {
-                'success':True,
-                'data':serializer.data
-            },
-            status=status.HTTP_200_OK
-        )
-        
+        designs = DesignSelectors.get_tailor_designs(request.user)
+        return Response({'success': True, 'data': DesignSerializer(designs, many=True).data})
+
+
 class TailorDesignDetailAPIView(APIView):
-    
-    """
-    API endpoint of retreiving specific design details.
-    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, design_id):
+        design = DesignSelectors.get_design_by_id(design_id)
+        if not design:
+            return Response({'detail': 'Design not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'success': True, 'data': DesignSerializer(design).data})
+
+    def patch(self, request, design_id):
+        design = Design.objects.filter(id=design_id, tailor=request.user).first()
+        if not design:
+            return Response({'detail': 'Design not found or unauthorized.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CreateDesignSerializer(design, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        design = DesignServices.update_design(design, **serializer.validated_data)
+        return Response({'success': True, 'data': DesignSerializer(design).data})
+
     def delete(self, request, design_id):
-        
-        design = DesignSelectors.get_design_by_id(
-            design_id
-        )
-        
-        if not design or design.tailor != request.user:
-            
-            return Response(
-                {
-                    'detail':'Design not found or unauthorized'
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
+        design = Design.objects.filter(id=design_id, tailor=request.user).first()
+        if not design:
+            return Response({'detail': 'Design not found or unauthorized.'}, status=status.HTTP_404_NOT_FOUND)
         DesignServices.delete_design(design)
-        
-        return Response(
-            {
-                'success':True,
-                'message':'Design deleted successfully.'
-            }
-        )
-    
-    
-    
-    
+        return Response({'success': True, 'message': 'Design deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
