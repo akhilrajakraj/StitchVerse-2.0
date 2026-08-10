@@ -1,65 +1,32 @@
-from .models import (
-    CustomUser,
-    CustomerProfile,
-    UserRole,
-    UserStatus,
-    Measurement, 
-)
+from .models import CustomUser, CustomerProfile, Measurement
+
 
 class AccountSelectors:
-    """
-    Handles reusable database query logic for account-related operations.
-    """
+    """Reusable, read-only database queries for account workflows."""
+
     @staticmethod
     def get_user_by_email(email):
-        """
-        Get user by Email
-        """
-        return CustomUser.objects.filter(
-            email=email
-        ).first()
-    
+        return CustomUser.objects.filter(email=email).first()
+
     @staticmethod
     def get_customer_profile(user):
-        """
-        Get Customer Profile of a user.
-        """
-        return CustomerProfile.objects.filter(
-            user=user
-        ).select_related(
-            'address'
-        ).first()
-    
+        return (
+            CustomerProfile.objects.filter(user=user)
+            .select_related("user", "address")
+            .first()
+        )
+
     @staticmethod
     def get_user_status(status):
-        
-        """"
-        Get User Status.
-        """
-        return CustomUser.objects.filter(
-            status=status
-        ).first()
-    
+        return CustomUser.objects.filter(status=status).first()
+
     @staticmethod
     def get_user_measurements(user):
-        """
-        Get User Measurements.
-        """
-        return user.measurements.all()
-    
+        return user.measurements.all().order_by("-updated_at")
+
     @staticmethod
-    def get_measurement_by_id(measurement_id):
-        """
-        Get Measurement by ID.
-        """
-        return Measurement.objects.filter(
-            id=measurement_id
-        ).first()
-        
-        
-    
-        
-        
-        
-        
-        
+    def get_measurement_by_id(measurement_id, customer=None):
+        queryset = Measurement.objects.filter(id=measurement_id)
+        if customer is not None:
+            queryset = queryset.filter(customer=customer)
+        return queryset.first()
