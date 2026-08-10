@@ -56,13 +56,13 @@ class AccountAPITests(APITestCase):
     def authenticate(self, user):
         response = self.client.post(
             reverse("accounts:login"),
-            {"email": "customer@example.com", "password": "StrongPassword123!"},
+            {"email": user.email, "password": "StrongPassword123!"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {response.data['access']}")
 
-    def test_customer_registration_is_atomic_and_creates_profile(self):
+    def test_customer_registration_creates_pending_customer_and_profile(self):
         response = self.client.post(
             reverse("accounts:register_customer"),
             self.registration_payload(),
@@ -70,7 +70,6 @@ class AccountAPITests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(User.objects.filter(email="customer@example.com").exists())
         user = User.objects.get(email="customer@example.com")
         self.assertEqual(user.role, UserRole.CUSTOMER)
         self.assertEqual(user.status, UserStatus.PENDING_VERIFY)
@@ -91,7 +90,7 @@ class AccountAPITests(APITestCase):
         self.assertEqual(User.objects.filter(email="customer@example.com").count(), 1)
 
     def test_unverified_customer_cannot_login(self):
-        User.objects.create_user(
+        user = User.objects.create_user(
             email="customer@example.com",
             password="StrongPassword123!",
             role=UserRole.CUSTOMER,
@@ -101,7 +100,7 @@ class AccountAPITests(APITestCase):
 
         response = self.client.post(
             reverse("accounts:login"),
-            {"email": "customer@example.com", "password": "StrongPassword123!"},
+            {"email": user.email, "password": "StrongPassword123!"},
             format="json",
         )
 
@@ -115,6 +114,25 @@ class AccountAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["data"]["user"]["id"], str(user.id))
+
+    def test_customer_can_patch_profile_and_nested_address(self):
+        user, _ = self.create_active_customer()
+        self.authenticate(user)
+
+        response = self.client.patch(
+            reverse("accounts:customer_profile"),
+            {
+                "full_name": "Updated Customer",
+                "address": {"city": "Kottayam", "pincode": "686001"},
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.customer_profile.refresh_from_db()
+        user.customer_profile.address.refresh_from_db()
+        self.assertEqual(user.customer_profile.full_name, "Updated Customer")
+        self.assertEqual(user.customer_profile.address.city, "Kottayam")
 
     def test_customer_can_create_and_list_measurements(self):
         user, _ = self.create_active_customer()
@@ -133,6 +151,26 @@ class AccountAPITests(APITestCase):
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(list_response.data["data"]), 1)
 
+    def test_customer_can_update_and_delete_own_measurement(self):
+        user, _ = self.create_active_customer()
+        self.authenticate(user)
+        measurement = Measurement.objects.create(customer=user, label="Shirt", chest_cm="96.00")
+
+        response = self.client.patch(
+            reverse("accounts:update_measurement", kwargs={"measurement_id": measurement.id}),
+            {"label": "Updated Shirt"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        measurement.refresh_from_db()
+        self.assertEqual(measurement.label, "Updated Shirt")
+
+        response = self.client.delete(
+            reverse("accounts:delete_measurement", kwargs={"measurement_id": measurement.id})
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Measurement.objects.filter(id=measurement.id).exists())
+
     def test_customer_cannot_update_another_customers_measurement(self):
         owner, _ = self.create_active_customer("owner@example.com")
         other, _ = self.create_active_customer("other@example.com")
@@ -141,16 +179,9 @@ class AccountAPITests(APITestCase):
             label="Shirt",
             chest_cm="96.00",
         )
+        self.authenticate(other)
 
-        response = self.client.post(
-            reverse("accounts:login"),
-            {"email": "other@example.com", "password": "StrongPassword123!"},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {response.data['access']}")
-
-        response = self.client.put(
+        response = self.client.patch(
             reverse("accounts:update_measurement", kwargs={"measurement_id": measurement.id}),
             {"label": "Hacked"},
             format="json",
