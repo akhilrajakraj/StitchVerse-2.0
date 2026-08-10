@@ -1,8 +1,18 @@
 import datetime
+
 from rest_framework import serializers
 
-from .models import GarmentCategory, StitchRequest, StitchRequestImage, DesignOrder, OrderStatusLog
+from apps.accounts.models import CustomUser, Measurement
 from apps.accounts.serializers import UserSerializer
+from apps.designs.models import Design
+
+from .models import (
+    DesignOrder,
+    GarmentCategory,
+    OrderStatusLog,
+    StitchRequest,
+    StitchRequestImage,
+)
 
 
 class StitchRequestImageSerializer(serializers.ModelSerializer):
@@ -20,14 +30,32 @@ class GarmentCategorySerializer(serializers.ModelSerializer):
 
 
 class CreateStitchRequestSerializer(serializers.ModelSerializer):
-    garment_type = serializers.PrimaryKeyRelatedField(queryset=GarmentCategory.objects.filter(is_active=True))
-    tailor = serializers.PrimaryKeyRelatedField(queryset=__import__('apps.accounts.models', fromlist=['CustomUser']).CustomUser.objects.filter(role='tailor'), required=False, allow_null=True)
-    measurement = serializers.PrimaryKeyRelatedField(queryset=__import__('apps.accounts.models', fromlist=['Measurement']).Measurement.objects.all(), required=False, allow_null=True)
-    reference_design = serializers.PrimaryKeyRelatedField(queryset=__import__('apps.designs.models', fromlist=['Design']).Design.objects.filter(is_active=True), required=False, allow_null=True)
+    garment_type = serializers.PrimaryKeyRelatedField(
+        queryset=GarmentCategory.objects.filter(is_active=True)
+    )
+    tailor = serializers.PrimaryKeyRelatedField(
+        queryset=CustomUser.objects.filter(role='tailor'),
+        required=False,
+        allow_null=True,
+    )
+    measurement = serializers.PrimaryKeyRelatedField(
+        queryset=Measurement.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    reference_design = serializers.PrimaryKeyRelatedField(
+        queryset=Design.objects.filter(is_active=True),
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = StitchRequest
-        fields = ['id', 'tailor', 'name', 'garment_type', 'fabric', 'color', 'pattern', 'design_details', 'instructions', 'measurement', 'reference_design', 'expected_date', 'quoted_price']
+        fields = [
+            'id', 'tailor', 'name', 'garment_type', 'fabric', 'color', 'pattern',
+            'design_details', 'instructions', 'measurement', 'reference_design',
+            'expected_date', 'quoted_price',
+        ]
         read_only_fields = ['id']
 
     def validate(self, data):
@@ -47,7 +75,12 @@ class StitchRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StitchRequest
-        fields = ['id', 'customer', 'tailor', 'name', 'garment_type', 'fabric', 'color', 'pattern', 'design_details', 'instructions', 'measurement', 'reference_design', 'expected_date', 'quoted_price', 'status', 'submitted_at', 'updated_at', 'images']
+        fields = [
+            'id', 'customer', 'tailor', 'name', 'garment_type', 'fabric', 'color',
+            'pattern', 'design_details', 'instructions', 'measurement',
+            'reference_design', 'expected_date', 'quoted_price', 'status',
+            'submitted_at', 'updated_at', 'images',
+        ]
         read_only_fields = ['id', 'customer', 'status', 'submitted_at', 'updated_at']
 
 
@@ -60,8 +93,14 @@ class StitchRequestDetailSerializer(StitchRequestSerializer):
 class DesignOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = DesignOrder
-        fields = ['id', 'customer', 'design', 'quantity', 'unit_price', 'total_amount', 'status', 'delivery_address', 'order_date', 'ordered_at', 'updated_at']
-        read_only_fields = ['id', 'customer', 'unit_price', 'total_amount', 'status', 'ordered_at', 'updated_at']
+        fields = [
+            'id', 'customer', 'design', 'quantity', 'unit_price', 'total_amount',
+            'status', 'delivery_address', 'order_date', 'ordered_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'id', 'customer', 'unit_price', 'total_amount', 'status',
+            'ordered_at', 'updated_at',
+        ]
 
 
 class OrderStatusLogSerializer(serializers.ModelSerializer):
@@ -69,5 +108,8 @@ class OrderStatusLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderStatusLog
-        fields = ['id', 'stitch_request', 'from_status', 'to_status', 'changed_by', 'note', 'changed_at']
+        fields = [
+            'id', 'stitch_request', 'from_status', 'to_status', 'changed_by',
+            'note', 'changed_at',
+        ]
         read_only_fields = ['id', 'changed_by', 'changed_at']
