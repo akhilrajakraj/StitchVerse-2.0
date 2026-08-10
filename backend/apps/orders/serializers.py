@@ -1,288 +1,115 @@
-from rest_framework import serializers
 import datetime
 
+from rest_framework import serializers
+
+from apps.accounts.models import CustomUser, Measurement
+from apps.accounts.serializers import UserSerializer
+from apps.designs.models import Design
+
 from .models import (
+    DesignOrder,
     GarmentCategory,
+    OrderStatusLog,
     StitchRequest,
     StitchRequestImage,
-    DesignOrder,
-    OrderStatusLog,
 )
-from apps.accounts.serializers import (
-    UserSerializer,
-)
+
 
 class StitchRequestImageSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for stitch request images.
-    """
-
     class Meta:
-
         model = StitchRequestImage
+        fields = ['id', 'image', 'uploaded_at']
+        read_only_fields = ['id', 'uploaded_at']
 
-        fields = [
-            'id',
-            'image',
-            'uploaded_at',
-        ]
 
-        read_only_fields = [
-            'id',
-            'uploaded_at',
-        ]
-        
-class StitchRequestSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for stitch request.
-    """
-
-    images = StitchRequestImageSerializer(many=True, read_only=True)
-
-    class Meta:
-
-        model = StitchRequest
-
-        fields = [
-            'id',
-            'customer',
-            'tailor',
-            'name',
-            'description',
-            'fabric',
-            'color',
-            'pattern',
-            'design_details',
-            'instructions',
-            'measurement',
-            'reference_design',
-            'expected_date',
-            'quoted_price',
-            'status',
-            'submitted_at',
-            'updated_at',
-            'images',  # Nested images
-        ]
-
-        read_only_fields = [
-            'id',
-            'customer',  # Set from request.user in view
-            'submitted_at',
-            'updated_at',
-        ]
-
-class DesignOrderSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for design order.
-    """
-
-    class Meta:
-
-        model = DesignOrder
-
-        fields = [
-            'id',
-            'customer',
-            'tailor',
-            'design',
-            'quoted_price',
-            'status',
-            'ordered_at',
-            'updated_at',
-        ]
-
-        read_only_fields = [
-            'id',
-            'customer',  # Set from request.user in view
-            'ordered_at',
-            'updated_at',
-        ]
-    
-class OrderStatusLogSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for order status log.
-    """
-
-    changed_by = UserSerializer(read_only=True)
-
-    class Meta:
-
-        model = OrderStatusLog
-
-        fields = [
-            'id',
-            'stitch_request',
-            'from_status',
-            'to_status',
-            'changed_by',
-            'note',
-            'changed_at',
-        ]
-
-        read_only_fields = [
-            'id',
-            'stitch_request',  # Set from context in view
-            'changed_by',     # Set from request.user in view
-            'changed_at',
-        ]
-        
 class GarmentCategorySerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for garment category.
-    """
-
     class Meta:
-
         model = GarmentCategory
+        fields = ['id', 'name', 'department', 'required_measurements']
+        read_only_fields = ['id']
 
-        fields = [
-            'id',
-            'name',
-            'department',
-            'required_measurements',
-        ]
-
-        read_only_fields = [
-            'id',
-        ]
 
 class CreateStitchRequestSerializer(serializers.ModelSerializer):
-
-    """
-    Serializer for creating stitch request.
-    """
-
-    name = serializers.CharField(
-        max_length=100,
-        required=True,
-    )
-    
     garment_type = serializers.PrimaryKeyRelatedField(
-        queryset=GarmentCategory.objects.all(),
+        queryset=GarmentCategory.objects.filter(is_active=True)
     )
-    
-    fabric = serializers.CharField(
-        max_length=100,
-        required=True,
-    )
-    color = serializers.CharField(
-        max_length=80,
+    tailor = serializers.PrimaryKeyRelatedField(
+        queryset=CustomUser.objects.filter(role='tailor'),
         required=False,
-        allow_blank=True,
+        allow_null=True,
     )
-    pattern = serializers.CharField(
-        max_length=80,
+    measurement = serializers.PrimaryKeyRelatedField(
+        queryset=Measurement.objects.all(),
         required=False,
-        allow_blank=True,
+        allow_null=True,
     )
-    design_details = serializers.JSONField(
+    reference_design = serializers.PrimaryKeyRelatedField(
+        queryset=Design.objects.filter(is_active=True),
         required=False,
+        allow_null=True,
     )
-    instructions = serializers.CharField(
-        required=False,
-        allow_blank=True,
-    )
-    expected_date = serializers.DateField(
-        required=False,
-    )
-    quoted_price = serializers.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        required=False,
-    )
-    
+
     class Meta:
-
         model = StitchRequest
-
         fields = [
-            'id',
-            'customer',
-            'tailor',
-            'name',
-            'garment_type',
-            'fabric',
-            'color',
-            'pattern',
-            'design_details',
-            'instructions',
-            'measurement',
-            'reference_design',
-            'expected_date',
-            'quoted_price',
+            'id', 'tailor', 'name', 'garment_type', 'fabric', 'color', 'pattern',
+            'design_details', 'instructions', 'measurement', 'reference_design',
+            'expected_date', 'quoted_price',
         ]
-        read_only_fields = [
-            'id',
-            'customer',  # Set from request.user in view
-            'measurement',  # Set from separate endpoint
-            'reference_design',  # Set from separate endpoint
-        ]
-    
+        read_only_fields = ['id']
+
     def validate(self, data):
-        """
-        Custom validation to ensure expected_date is in the future.
-        """
         expected_date = data.get('expected_date')
-        if expected_date and expected_date < datetime.date.today():
-            raise serializers.ValidationError("Expected date must be in the future.")
+        if expected_date and expected_date <= datetime.date.today():
+            raise serializers.ValidationError({'expected_date': 'Expected date must be in the future.'})
         return data
-    
+
     def validate_quoted_price(self, value):
-
         if value is not None and value < 0:
-
-            raise serializers.ValidationError(
-                'Quoted price cannot be negative.'
-            )
-
+            raise serializers.ValidationError('Quoted price cannot be negative.')
         return value
 
-class StitchRequestDetailSerializer(serializers.ModelSerializer):
 
-    """
-    Serializer for stitch request details.
-    """
-
+class StitchRequestSerializer(serializers.ModelSerializer):
     images = StitchRequestImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = StitchRequest
+        fields = [
+            'id', 'customer', 'tailor', 'name', 'garment_type', 'fabric', 'color',
+            'pattern', 'design_details', 'instructions', 'measurement',
+            'reference_design', 'expected_date', 'quoted_price', 'status',
+            'submitted_at', 'updated_at', 'images',
+        ]
+        read_only_fields = ['id', 'customer', 'status', 'submitted_at', 'updated_at']
+
+
+class StitchRequestDetailSerializer(StitchRequestSerializer):
     customer = UserSerializer(read_only=True)
     tailor = UserSerializer(read_only=True)
     garment_type = GarmentCategorySerializer(read_only=True)
 
+
+class DesignOrderSerializer(serializers.ModelSerializer):
     class Meta:
-
-        model = StitchRequest
-
+        model = DesignOrder
         fields = [
-            'id',
-            'customer',
-            'tailor',
-            'name',
-            'garment_type',
-            'fabric',
-            'color',
-            'pattern',
-            'design_details',
-            'instructions',
-            'measurement',
-            'reference_design',
-            'expected_date',
-            'quoted_price',
-            'status',
-            'submitted_at',
-            'updated_at',
-            'images',  # Nested images
+            'id', 'customer', 'design', 'quantity', 'unit_price', 'total_amount',
+            'status', 'delivery_address', 'order_date', 'ordered_at', 'updated_at',
         ]
-
         read_only_fields = [
-            'id',
-            'customer',  # Set from request.user in view
-            'tailor',    # Set from view logic
-            'submitted_at',
-            'updated_at',
+            'id', 'customer', 'unit_price', 'total_amount', 'status',
+            'ordered_at', 'updated_at',
         ]
 
+
+class OrderStatusLogSerializer(serializers.ModelSerializer):
+    changed_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = OrderStatusLog
+        fields = [
+            'id', 'stitch_request', 'from_status', 'to_status', 'changed_by',
+            'note', 'changed_at',
+        ]
+        read_only_fields = ['id', 'changed_by', 'changed_at']
