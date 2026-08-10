@@ -1,9 +1,9 @@
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import StitchRequest, StitchRequestStatus
+from .models import OrderStatus
 from .selectors import StitchRequestSelectors
 from .serializers import (
     CreateStitchRequestSerializer,
@@ -33,7 +33,10 @@ class CreateStitchRequestAPIView(APIView):
             uploaded_images=request.FILES.getlist('uploaded_images'),
             **serializer.validated_data,
         )
-        return Response({'success': True, 'message': 'Stitch request created successfully.', 'stitch_request_id': stitch_request.id}, status=status.HTTP_201_CREATED)
+        return Response(
+            {'success': True, 'message': 'Stitch request created successfully.', 'stitch_request_id': stitch_request.id},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class CustomerStitchRequestListAPIView(APIView):
@@ -68,22 +71,36 @@ class TailorStitchRequestListAPIView(APIView):
 class TailorStitchRequestActionAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    ACTIONS = {
+        'accept': (OrderStatus.ACCEPTED, 'Request accepted by tailor.'),
+        'reject': (OrderStatus.CANCELLED, 'Request rejected by tailor.'),
+        'start_stitching': (OrderStatus.STITCHING, 'Tailor started stitching.'),
+        'quality_check': (OrderStatus.QUALITY_CHECK, 'Request submitted for quality check.'),
+        'ready': (OrderStatus.READY_FOR_DELIVERY, 'Request marked ready for delivery.'),
+    }
+
     def post(self, request, stitch_request_id):
         stitch_request = StitchRequestSelectors.get_stitch_request_by_id(stitch_request_id, tailor=request.user)
         if not stitch_request:
             return Response({'success': False, 'message': 'Stitch request not found.'}, status=status.HTTP_404_NOT_FOUND)
+
         action = request.data.get('action')
-        target = {
-            'accept': StitchRequestStatus.ACCEPTED,
-            'reject': StitchRequestStatus.REJECTED,
-            'start_stitching': StitchRequestStatus.STITCHING,
-            'quality_check': StitchRequestStatus.QUALITY_CHECK,
-            'ready': StitchRequestStatus.READY_FOR_DELIVERY,
-        }.get(action)
-        if not target:
+        transition = self.ACTIONS.get(action)
+        if not transition:
             return Response({'success': False, 'message': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
-        StitchRequestServices.update_stitch_request_status(stitch_request, target, changed_by=request.user)
-        return Response({'success': True, 'status': target})
+
+        target, default_note = transition
+        try:
+            updated = StitchRequestServices.transition(
+                stitch_request,
+                target,
+                actor=request.user,
+                note=request.data.get('note') or default_note,
+            )
+        except ValueError as exc:
+            return Response({'success': False, 'message': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'success': True, 'status': updated.status})
 
 
 class StitchRequestImageListAPIView(APIView):
